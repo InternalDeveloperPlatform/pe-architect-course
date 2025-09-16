@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 # Define a sudo wrapper
-run_as_root() {
-  if [ "$(id -u)" -ne 0 ]; then
-    sudo "$@"
-  else
-    "$@"
-  fi
-}
+# run_as_root() {
+#   if [ "$(id -u)" -ne 0 ]; then
+#     sudo "$@"
+#   else
+#     "$@"
+#   fi
+# }
 
-run_as_root apt-get install -y curl unzip wget net-tools jq
+# run_as_root apt-get install -y curl unzip wget net-tools jq
 
 # # Make certificates happen :)
 # if ! command -v mkcert &> /dev/null
