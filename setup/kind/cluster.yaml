@@ -1,0 +1,21 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: 5min-idp
+nodes:
+- role: control-plane
+  extraPortMappings:
+  - containerPort: 30080
+    hostPort: 80
+    listenAddress: "0.0.0.0"
+    protocol: TCP
+  - containerPort: 30443
+    hostPort: 443
+    listenAddress: "0.0.0.0"
+    protocol: TCP
+  - containerPort: 6443
+    hostPort: 6443
+    protocol: TCP
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry]
+    config_path = "/etc/containerd/certs.d"
