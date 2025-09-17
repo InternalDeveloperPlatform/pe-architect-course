@@ -207,8 +207,8 @@ fi
 # Get the gateway API in if we want to work with score-k8s
 #kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
 # ATTENTION WITH THIS ONE - we need this at least for Git to be able to interact with the self-signed cert
-echo "git config --global user.name \"giteaAdmin\"" >> $HOME/.bashrc
-echo "git config --global credential.helper store" >> $HOME/.bashrc
+# echo "git config --global user.name \"giteaAdmin\"" >> $HOME/.bashrc
+# echo "git config --global credential.helper store" >> $HOME/.bashrc
 
 ### Export needed env-vars for terraform
 # Variables for TLS in Terraform
@@ -221,60 +221,60 @@ export TF_VAR_kubeconfig=$kubeconfig_docker
 terraform -chdir=setup/terraform init
 terraform -chdir=setup/terraform apply -auto-approve
 
-# Check if the gitea_runner container is already running
-if [ "$(docker inspect -f '{{.State.Running}}' gitea_runner 2>/dev/null || true)" != 'true' ]; then
-  # Create Gitea Runner for Actions CI
-  RUNNER_TOKEN=""
-  while [[ -z $RUNNER_TOKEN ]]; do
-    response=$(curl -k -s -X 'GET' 'https://5min-idp-control-plane/api/v1/admin/runners/registration-token' -H 'accept: application/json' -H 'authorization: Basic NW1pbmFkbWluOjVtaW5hZG1pbg==')
-    if [[ $response == *"token"* ]]; then
-      RUNNER_TOKEN=$(echo $response | jq -r '.token')
-    fi
-    sleep 1
-  done
-
-  # Start Gitea Runner
-  docker volume create gitea_runner_data
-  docker create \
-    --name gitea_runner \
-    -v gitea_runner_data:/data \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v /etc/ssl/certs:/etc/ssl/certs:ro \
-    -v /etc/ca-certificates:/etc/ca-certificates:ro \
-    -e CONFIG_FILE=/config.yaml \
-    -e GITEA_INSTANCE_URL=https://5min-idp-control-plane \
-    -e GITEA_RUNNER_REGISTRATION_TOKEN=$RUNNER_TOKEN \
-    -e GITEA_RUNNER_NAME=local \
-    -e GITEA_RUNNER_LABELS=local \
-    --network kind \
-    gitea/act_runner:latest
-  # sed 's|###ca-certficates.crt###|'"$TLS_CA_CERT"'|' setup/gitea/config.yaml > setup/gitea/config.done.yaml
-  # docker cp setup/gitea/config.done.yaml gitea_runner:/config.yaml
-  docker cp setup/gitea/config.yaml gitea_runner:/config.yaml
-  docker start gitea_runner
-else
-  echo "gitea_runner container is already running and gitea configured."
-fi
-
-# Create Gitea org with configuration
-curl -k -X 'POST' \
-  'https://5min-idp-control-plane/api/v1/orgs' \
-  -H 'accept: application/json' \
-  -H 'authorization: Basic NW1pbmFkbWluOjVtaW5hZG1pbg==' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "repo_admin_change_team_access": true,
-  "username": "5minorg",
-  "visibility": "public"
-}'
-curl -k -X 'POST' \
-  'https://5min-idp-control-plane/api/v1/orgs/5minorg/actions/variables/CLOUD_PROVIDER' \
-  -H 'accept: application/json' \
-  -H 'authorization: Basic NW1pbmFkbWluOjVtaW5hZG1pbg==' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "value": "5min"
-}'
+# # Check if the gitea_runner container is already running
+# if [ "$(docker inspect -f '{{.State.Running}}' gitea_runner 2>/dev/null || true)" != 'true' ]; then
+#   # Create Gitea Runner for Actions CI
+#   RUNNER_TOKEN=""
+#   while [[ -z $RUNNER_TOKEN ]]; do
+#     response=$(curl -k -s -X 'GET' 'https://5min-idp-control-plane/api/v1/admin/runners/registration-token' -H 'accept: application/json' -H 'authorization: Basic NW1pbmFkbWluOjVtaW5hZG1pbg==')
+#     if [[ $response == *"token"* ]]; then
+#       RUNNER_TOKEN=$(echo $response | jq -r '.token')
+#     fi
+#     sleep 1
+#   done
+#
+#   # Start Gitea Runner
+#   docker volume create gitea_runner_data
+#   docker create \
+#     --name gitea_runner \
+#     -v gitea_runner_data:/data \
+#     -v /var/run/docker.sock:/var/run/docker.sock \
+#     -v /etc/ssl/certs:/etc/ssl/certs:ro \
+#     -v /etc/ca-certificates:/etc/ca-certificates:ro \
+#     -e CONFIG_FILE=/config.yaml \
+#     -e GITEA_INSTANCE_URL=https://5min-idp-control-plane \
+#     -e GITEA_RUNNER_REGISTRATION_TOKEN=$RUNNER_TOKEN \
+#     -e GITEA_RUNNER_NAME=local \
+#     -e GITEA_RUNNER_LABELS=local \
+#     --network kind \
+#     gitea/act_runner:latest
+#   # sed 's|###ca-certficates.crt###|'"$TLS_CA_CERT"'|' setup/gitea/config.yaml > setup/gitea/config.done.yaml
+#   # docker cp setup/gitea/config.done.yaml gitea_runner:/config.yaml
+#   docker cp setup/gitea/config.yaml gitea_runner:/config.yaml
+#   docker start gitea_runner
+# else
+#   echo "gitea_runner container is already running and gitea configured."
+# fi
+#
+# # Create Gitea org with configuration
+# curl -k -X 'POST' \
+#   'https://5min-idp-control-plane/api/v1/orgs' \
+#   -H 'accept: application/json' \
+#   -H 'authorization: Basic NW1pbmFkbWluOjVtaW5hZG1pbg==' \
+#   -H 'Content-Type: application/json' \
+#   -d '{
+#   "repo_admin_change_team_access": true,
+#   "username": "5minorg",
+#   "visibility": "public"
+# }'
+# curl -k -X 'POST' \
+#   'https://5min-idp-control-plane/api/v1/orgs/5minorg/actions/variables/CLOUD_PROVIDER' \
+#   -H 'accept: application/json' \
+#   -H 'authorization: Basic NW1pbmFkbWluOjVtaW5hZG1pbg==' \
+#   -H 'Content-Type: application/json' \
+#   -d '{
+#   "value": "5min"
+# }'
 
 # Set some nice aliases
 echo "alias k='kubectl'" >> $HOME/.bashrc
