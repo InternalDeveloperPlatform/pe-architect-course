@@ -2,120 +2,25 @@
 
 This guide will walk you through setting up a complete Kubernetes development environment with monitoring and policy management tools.
 
-## Prerequisites
-
-- macOS (Intel or Apple Silicon)
-- At least 16GB RAM (recommended 24GB+)
-- 50GB+ available disk space
-- Admin privileges on your machine
-
 ## Table of Contents
 
-1. [Installing kubectl](#installing-kubectl)
-2. [Installing Rancher Desktop](#installing-rancher-desktop)
-3. [Installing Grafana Stack](#installing-grafana-stack)
-4. [Installing Gatekeeper](#installing-gatekeeper)
-5. [Verification Steps](#verification-steps)
-
----
-
-## Installing kubectl
-
-kubectl is the command-line tool for interacting with Kubernetes clusters.
-
-### Option 1: Using Homebrew (Recommended)
-
-```bash
-# Install kubectl
-brew install kubectl
-
-# Verify installation
-kubectl version --client
-```
-
-### Option 2: Direct Download
-
-```bash
-# Download kubectl binary
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/amd64/kubectl"
-
-# Make it executable
-chmod +x ./kubectl
-
-# Move to PATH
-sudo mv ./kubectl /usr/local/bin/kubectl
-
-# Verify installation
-kubectl version --client
-```
-
-### Option 3: Using curl with specific version
-
-```bash
-# Download specific version (v1.28.3 to match Rancher Desktop)
-curl -LO "https://dl.k8s.io/release/v1.28.3/bin/darwin/amd64/kubectl"
-chmod +x ./kubectl
-sudo mv ./kubectl /usr/local/bin/kubectl
-```
-
----
-
-## Installing Rancher Desktop
-
-Rancher Desktop provides a Kubernetes environment with an integrated container runtime.
-
-### Step 1: Download and Install
-
-1. Visit [Rancher Desktop Releases](https://github.com/rancher-sandbox/rancher-desktop/releases)
-2. Download the latest `.dmg` file for macOS
-3. Open the downloaded `.dmg` file
-4. Drag Rancher Desktop to Applications folder
-5. Launch Rancher Desktop from Applications
-
-### Step 2: Initial Configuration
-
-When Rancher Desktop starts for the first time, configure the following settings:
-
-#### Kubernetes Settings
-- **Enable Kubernetes**: ✅ Checked
-- **Kubernetes Version**: Select `v1.28.3`
-- **Container Runtime**: Select `dockerd (moby)`
-- **Enable Traefik**: ✅ Checked
-
-#### Virtual Machine Settings
-- **Memory (GB)**: `8`
-- **CPUs**: `6`
-- **Emulation**: Select `QEMU`
-
-### Step 3: Apply Configuration
-
-```bash
-# After configuration, click "Apply" and wait for Rancher Desktop to restart
-# This process may take 5-10 minutes
-
-# Verify Kubernetes is running
-kubectl get nodes
-
-# Expected output:
-# NAME                   STATUS   ROLES                  AGE   VERSION
-# lima-rancher-desktop   Ready    control-plane,master   1m    v1.28.3+k3s1
-```
-
-### Step 4: Configure kubectl Context
-
-```bash
-# Verify current context
-kubectl config current-context
-
-# Should show: rancher-desktop
-
-# Test cluster connectivity
-kubectl cluster-info
-```
+1. [Installing Grafana Stack](#installing-grafana-stack)
+2. [Installing Gatekeeper](#installing-gatekeeper)
+3. [Verification Steps](#verification-steps)
 
 ---
 
 ## Installing Grafana Stack
+
+### Prerequisite
+
+Install Helm:
+
+```bash
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+```
 
 The Grafana stack includes Prometheus, Grafana, AlertManager, and other monitoring tools.
 
@@ -214,7 +119,9 @@ helm install grafana-stack prometheus-community/kube-prometheus-stack \
 kubectl get pods -n monitoring
 ```
 
-### Step 4: Access Grafana
+### Step 4: Access Grafana -
+
+# TODO - Proxy port forwarding in coder.com
 
 ```bash
 # Get Grafana admin password (if you didn't set one)
@@ -261,12 +168,13 @@ kubectl get pods -n gatekeeper-system
 # gatekeeper-policy-manager-xxx                    1/1     Running   0          1m
 ```
 
-### Step 3: Create a Sample Constraint Template
+### Verify gatekeeper install worked.
 
-```bash
-# Create a constraint template for required labels
-kubectl apply -f - << 'EOF'
-apiVersion: templates.gatekeeper.sh/v1beta1
+Deploy a simple constraint template
+`k apply -f simple-constraint-template.yaml`
+
+``` yaml
+apiVersion: templates.gatekeeper.sh/v1
 kind: ConstraintTemplate
 metadata:
   name: k8srequiredlabels
@@ -276,6 +184,7 @@ spec:
       names:
         kind: K8sRequiredLabels
       validation:
+        # Schema for the `parameters` field
         openAPIV3Schema:
           type: object
           properties:
@@ -288,33 +197,29 @@ spec:
       rego: |
         package k8srequiredlabels
 
-        violation[{"msg": msg}] {
-          required := input.parameters.labels
-          provided := input.review.object.metadata.labels
-          missing := required[_]
-          not provided[missing]
-          msg := sprintf("Missing required label: %v", [missing])
+        violation[{"msg": msg, "details": {"missing_labels": missing}}] {
+          provided := {label | input.review.object.metadata.labels[label]}
+          required := {label | label := input.parameters.labels[_]}
+          missing := required - provided
+          count(missing) > 0
+          msg := sprintf("you must provide labels: %v", [missing])
         }
-EOF
 ```
 
-### Step 4: Create a Sample Constraint
+`k apply -f simple-constraint.yaml`
 
-```bash
-# Apply constraint to require 'environment' label on all namespaces
-kubectl apply -f - << 'EOF'
+``` yaml
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredLabels
 metadata:
-  name: namespace-must-have-env-label
+  name: ns-must-have-gk
 spec:
   match:
     kinds:
       - apiGroups: [""]
         kinds: ["Namespace"]
   parameters:
-    labels: ["environment"]
-EOF
+    labels: ["admission"]
 ```
 
 ### Step 5: Test the Constraint
@@ -324,15 +229,9 @@ EOF
 kubectl create namespace test-namespace
 
 # Create a namespace with the required label (should succeed)
-kubectl apply -f - << 'EOF'
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: test-namespace-with-label
-  labels:
-    environment: development
-EOF
+kubectl apply -f simple-ns-with-label.yaml
 ```
+
 
 ---
 
@@ -350,9 +249,6 @@ kubectl get nodes
 # Check all pods across namespaces
 kubectl get pods --all-namespaces
 
-# Verify Traefik (Rancher Desktop's ingress controller)
-kubectl get pods -n kube-system | grep traefik
-
 # Check services
 kubectl get services --all-namespaces
 ```
@@ -364,27 +260,6 @@ kubectl get services --all-namespaces
 kubectl top nodes
 kubectl top pods --all-namespaces
 ```
-
-### Access Web Interfaces
-
-```bash
-# Grafana
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
-
-# Prometheus
-kubectl port-forward -n monitoring service/grafana-stack-prometheus 9090:9090
-
-# AlertManager
-kubectl port-forward -n monitoring service/grafana-stack-alertmanager 9093:9093
-```
-
-**Access URLs:**
-- **Grafana**: http://localhost:3000 (admin/admin123)
-- **Prometheus**: http://localhost:9090
-- **AlertManager**: http://localhost:9093
-- **Traefik Dashboard**: http://localhost:8080 (if enabled)
-
-### Troubleshooting
 
 #### Common Issues
 
@@ -425,13 +300,6 @@ kubectl scale deployment -n monitoring grafana-stack-prometheus-node-exporter --
 kubectl scale deployment -n monitoring grafana-stack-kube-state-metrics --replicas=0
 ```
 
-## Next Steps
-
-1. **Explore Grafana Dashboards**: Import community dashboards for Kubernetes monitoring
-2. **Create Custom Policies**: Develop Gatekeeper policies specific to your needs
-3. **Set up Ingress**: Configure Traefik ingress rules for your applications
-4. **Add Applications**: Deploy sample applications to test the complete stack
-
 ## Cleanup
 
 To remove the entire setup:
@@ -443,9 +311,8 @@ kubectl delete namespace monitoring
 
 # Uninstall Gatekeeper
 kubectl delete -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.14/deploy/gatekeeper.yaml
-
-# Stop Rancher Desktop and delete application
-# Quit Rancher Desktop and move it to Trash
 ```
 
-This completes your Kubernetes sandbox setup with monitoring and policy management capabilit
+This completes your Kubernetes sandbox setup with monitoring and policy management capability
+
+The next module is `capoc/cve`
