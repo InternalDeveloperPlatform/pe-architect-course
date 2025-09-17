@@ -1,5 +1,8 @@
-1. install falco
+# Secops Module Exercises
 
+## install falco
+
+```bash
 helm repo add falcosecurity https://falcosecurity.github.io/charts
 helm repo update
 
@@ -11,16 +14,21 @@ helm install falco falcosecurity/falco \
   --set falco.grpcOutput.enabled=true
 
 kubectl get pods -n falco
+```
 
 2. Add constraint template
 3. Add constraint
 4. Deploy deployment.yaml
 5. Deploy deployment-working.yaml
 
-
+```bash
 helm upgrade falco falcosecurity/falco \
   --namespace falco-system \
   --set driver.kind=modern_ebpf \
   --set falco.grpc.enabled=true \
   --set falco.grpcOutput.enabled=true \
   --set-file customRules."custom_rules\.yaml"=./root-detect-rule.yaml
+
+# Watch this fail
+kubectl run mycurlpod --image=curlimages/curl -i --tty --rm --restart=Never -- sh
+```
