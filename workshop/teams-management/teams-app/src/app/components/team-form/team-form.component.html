@@ -1,0 +1,31 @@
+<!-- src/app/components/team-form/team-form.component.html -->
+<form [formGroup]="teamForm" (ngSubmit)="onSubmit()" class="team-form">
+  <div class="form-group">
+    <label for="name">Team Name</label>
+    <input
+      type="text"
+      id="name"
+      formControlName="name"
+      class="form-control"
+      [class.invalid]="name?.invalid && name?.touched"
+      placeholder="Enter team name"
+    >
+    <div class="error-message" *ngIf="name?.invalid && name?.touched">
+      <span *ngIf="name?.errors?.['required']">Team name is required</span>
+      <span *ngIf="name?.errors?.['minlength']">Team name must be at least 2 characters</span>
+    </div>
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <button
+    type="submit"
+    class="btn btn-primary"
+    [disabled]="teamForm.invalid || isSubmitting"
+  >
+    <span *ngIf="isSubmitting">Creating...</span>
+    <span *ngIf="!isSubmitting">Create Team</span>
+  </button>
+</form>

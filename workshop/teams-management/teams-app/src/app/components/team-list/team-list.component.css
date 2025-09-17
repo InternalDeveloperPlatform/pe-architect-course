@@ -1,0 +1,92 @@
+/* src/app/components/team-list/team-list.component.css */
+.team-list {
+  width: 100%;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+  font-size: 18px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+}
+
+.empty-state p {
+  font-size: 16px;
+}
+
+.teams-grid {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.team-card {
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.team-card:hover {
+  border-color: #3498db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.team-name {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.team-details p {
+  margin: 5px 0;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.team-id {
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+}
+
+.team-created {
+  font-weight: 500;
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.teams-count {
+  text-align: center;
+  padding: 15px;
+  background: #ecf0f1;
+  border-radius: 6px;
+  color: #7f8c8d;
+  font-weight: 600;
+}

@@ -1,0 +1,110 @@
+# ServiceAccount for the operator
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: teams-operator
+  namespace: engineering-platform
+---
+# ClusterRole with permissions to manage namespaces
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: teams-operator
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create"]
+---
+# ClusterRoleBinding to grant permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: teams-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: teams-operator
+subjects:
+- kind: ServiceAccount
+  name: teams-operator
+  namespace: engineering-platform
+---
+# Namespace for the operator
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: engineering-platform
+---
+# Deployment for the Teams Operator
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teams-operator
+  namespace: engineering-platform
+  labels:
+    app: teams-operator
+  annotations:
+    commit-sha: 8b514a1cb354
+spec:
+  replicas: 1  # Only one replica needed for this operator
+  selector:
+    matchLabels:
+      app: teams-operator
+  template:
+    metadata:
+      labels:
+        app: teams-operator
+    spec:
+      serviceAccountName: teams-operator
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: teams-operator
+        image: olivercodes01/teams-operator:0.0.1
+        env:
+        - name: TEAMS_API_URL
+          value: "http://teams-api-service.engineering-platform.svc.cluster.local:4200"
+        - name: POLL_INTERVAL
+          value: "30"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import sys; sys.exit(0)"
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import sys; sys.exit(0)"
+          initialDelaySeconds: 5
+          periodSeconds: 10

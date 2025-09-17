@@ -1,0 +1,39 @@
+<div *ngIf="isLoading" class="loading-screen">
+  <div class="loading-spinner">
+    <p>Loading...</p>
+  </div>
+</div>
+
+<div *ngIf="!isLoading">
+  <app-header></app-header>
+
+  <div class="container" *ngIf="isLoggedIn">
+    <main class="main-content" *ngIf="authService.hasRole('team-leader')">
+      <div class="form-section">
+        <h2>Create New Team</h2>
+        <app-team-form (teamCreated)="teamList.loadTeams()"></app-team-form>
+      </div>
+
+      <div class="list-section">
+        <h2>Existing Teams</h2>
+        <app-team-list #teamList></app-team-list>
+      </div>
+    </main>
+
+    <div class="access-denied" *ngIf="!authService.hasRole('team-leader')">
+      <h2>Access Denied</h2>
+      <p>You don't have permission to manage teams. Please contact your administrator.</p>
+      <p>Your current roles: {{ authService.getUserRoles().join(', ') || 'No roles assigned' }}</p>
+    </div>
+  </div>
+
+  <div class="login-prompt" *ngIf="!isLoggedIn">
+    <div class="login-card">
+      <h2>Welcome to Teams Management</h2>
+      <p>Please log in to manage your engineering teams.</p>
+      <button class="btn btn-primary btn-lg" (click)="login()">
+        Login with Keycloak
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+# k8s/teams-ui-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teams-ui
+  namespace: engineering-platform
+  labels:
+    app: teams-ui
+    component: frontend
+  annotations:
+    commit-sha: 8b514a1cb354
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: teams-ui
+  template:
+    metadata:
+      labels:
+        app: teams-ui
+        component: frontend
+    spec:
+      containers:
+      - name: teams-ui
+        image: olivercodes01/teams-app:0.0.7
+        ports:
+        - containerPort: 80
+        env:
+        - name: API_URL
+          value: "http://teams-api-service:4200"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5

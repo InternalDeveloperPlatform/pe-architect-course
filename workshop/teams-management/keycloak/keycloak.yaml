@@ -1,0 +1,401 @@
+# # k8s/keycloak-namespace.yaml apiVersion: v1
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: keycloak
+# ---
+# # k8s/keycloak-postgres.yaml
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: keycloak-postgres
+#   namespace: keycloak
+#   labels:
+#     app: keycloak-postgres
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: keycloak-postgres
+#   template:
+#     metadata:
+#       labels:
+#         app: keycloak-postgres
+#     spec:
+#       containers:
+#       - name: postgres
+#         image: postgres:15-alpine
+#         env:
+#         - name: POSTGRES_DB
+#           value: keycloak
+#         - name: POSTGRES_USER
+#           value: keycloak
+#         - name: POSTGRES_PASSWORD
+#           value: keycloak
+#         - name: PGDATA
+#           value: /var/lib/postgresql/data/pgdata
+#         ports:
+#         - containerPort: 5432
+#         volumeMounts:
+#         - name: postgres-storage
+#           mountPath: /var/lib/postgresql/data
+#         resources:
+#           requests:
+#             memory: "256Mi"
+#             cpu: "250m"
+#           limits:
+#             memory: "512Mi"
+#             cpu: "500m"
+#       volumes:
+#       - name: postgres-storage
+#         emptyDir: {}
+#
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: keycloak-postgres-service
+#   namespace: keycloak
+# spec:
+#   selector:
+#     app: keycloak-postgres
+#   ports:
+#   - port: 5432
+#     targetPort: 5432
+#
+# ---
+# # k8s/keycloak-deployment.yaml
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: keycloak
+#   namespace: keycloak
+#   labels:
+#     app: keycloak
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: keycloak
+#   template:
+#     metadata:
+#       labels:
+#         app: keycloak
+#     spec:
+#       containers:
+#       - name: keycloak
+#         image: quay.io/keycloak/keycloak:22.0
+#         args:
+#         - "start-dev"
+#         - "--import-realm"
+#         env:
+#         - name: KEYCLOAK_ADMIN
+#           value: admin
+#         - name: KEYCLOAK_ADMIN_PASSWORD
+#           value: admin
+#         - name: KC_DB
+#           value: postgres
+#         - name: KC_DB_URL
+#           value: jdbc:postgresql://keycloak-postgres-service:5432/keycloak
+#         - name: KC_DB_USERNAME
+#           value: keycloak
+#         - name: KC_DB_PASSWORD
+#           value: keycloak
+#         - name: KC_HOSTNAME
+#           value: platform-auth.127.0.0.1.sslip.io
+#         - name: KC_HOSTNAME_STRICT
+#           value: "false"
+#         - name: KC_HTTP_ENABLED
+#           value: "true"
+#         - name: KC_HOSTNAME_STRICT_HTTPS
+#           value: "false"
+#         - name: KC_HTTP_CORS_ENABLED
+#           value: "true"
+#         - name: KC_HTTP_CORS_ORIGINS
+#           value: "*"
+#         - name: KC_HTTP_CORS_METHODS
+#           value: "GET,POST,PUT,DELETE,OPTIONS"
+#         - name: KC_HTTP_CORS_HEADERS
+#           value: "Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization"
+#         ports:
+#         - containerPort: 8080
+#         readinessProbe:
+#           httpGet:
+#             path: /realms/master
+#             port: 8080
+#           initialDelaySeconds: 30
+#           periodSeconds: 10
+#         livenessProbe:
+#           httpGet:
+#             path: /realms/master
+#             port: 8080
+#           initialDelaySeconds: 60
+#           periodSeconds: 30
+#         resources:
+#           requests:
+#             memory: "512Mi"
+#             cpu: "500m"
+#           limits:
+#             memory: "1Gi"
+#             cpu: "1000m"
+#         volumeMounts:
+#         - name: keycloak-realm
+#           mountPath: /opt/keycloak/data/import
+#           readOnly: true
+#       volumes:
+#       - name: keycloak-realm
+#         configMap:
+#           name: keycloak-realm-config
+#
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: keycloak-service
+#   namespace: keycloak
+# spec:
+#   selector:
+#     app: keycloak
+#   ports:
+#   - port: 8080
+#     targetPort: 8080
+#     name: http
+#
+# ---
+# # k8s/keycloak-ingress.yaml
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: keycloak-ingress
+#   namespace: keycloak
+# spec:
+#   ingressClassName: traefik
+#   rules:
+#   - host: platform-auth.127.0.0.1.sslip.io
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: keycloak-service
+#             port:
+#               number: 8080
+#
+# ---
+# # k8s/keycloak-realm-config.yaml
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: keycloak-realm-config
+#   namespace: keycloak
+# data:
+#   teams-realm.json: |
+#     {
+#       "realm": "teams",
+#       "enabled": true,
+#       "sslRequired": "none",
+#       "registrationAllowed": false,
+#       "resetPasswordAllowed": true,
+#       "editUsernameAllowed": false,
+#       "bruteForceProtected": true,
+#       "clients": [
+#         {
+#           "clientId": "teams-ui",
+#           "name": "Teams UI",
+#           "description": "Angular Teams Management UI",
+#           "enabled": true,
+#           "clientAuthenticatorType": "client-secret",
+#           "redirectUris": [
+#             "http://platform-auth.127.0.0.1.sslip.io/*",
+#             "http://engineering-platform.local/*",
+#             "http://localhost:4200/*"
+#           ],
+#           "webOrigins": [
+#             "http://platform-auth.127.0.0.1.sslip.io",
+#             "http://engineering-platform.local",
+#             "http://localhost:4200"
+#           ],
+#           "publicClient": true,
+#           "protocol": "openid-connect",
+#           "attributes": {
+#             "post.logout.redirect.uris": "http://platform-auth.127.0.0.1.sslip.io/*##http://localhost:4200/*"
+#           }
+#         }
+#       ],
+#       "users": [
+#         {
+#           "username": "teamlead1",
+#           "enabled": true,
+#           "firstName": "Team",
+#           "lastName": "Lead",
+#           "email": "teamlead1@company.com",
+#           "emailVerified": true,
+#           "credentials": [
+#             {
+#               "type": "password",
+#               "value": "password123",
+#               "temporary": false
+#             }
+#           ],
+#           "realmRoles": ["team-leader"]
+#         },
+#         {
+#           "username": "admin",
+#           "enabled": true,
+#           "firstName": "Admin",
+#           "lastName": "User",
+#           "email": "admin@company.com",
+#           "emailVerified": true,
+#           "credentials": [
+#             {
+#               "type": "password",
+#               "value": "admin123",
+#               "temporary": false
+#             }
+#           ],
+#           "realmRoles": ["admin", "team-leader"]
+#         }
+#       ],
+#       "roles": {
+#         "realm": [
+#           {
+#             "name": "team-leader",
+#             "description": "Can create and manage teams"
+#           },
+#           {
+#             "name": "admin",
+#             "description": "Full administrative access"
+#           }
+#         ]
+#       }
+#     }
+#
+#
+# k8s/keycloak-deployment.yaml (Enhanced with comprehensive CORS)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:22.0
+        args:
+        - "start-dev"
+        - "--import-realm"
+        - "--spi-login-protocol-openid-connect-cors-enabled=true"
+        - "--spi-login-protocol-openid-connect-cors-allowed-origins=*"
+        - "--spi-login-protocol-openid-connect-cors-allowed-methods=GET,POST,OPTIONS,PUT,DELETE"
+        - "--spi-login-protocol-openid-connect-cors-allowed-headers=*"
+        env:
+        - name: KEYCLOAK_ADMIN
+          value: admin
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: admin
+        - name: KC_DB
+          value: postgres
+        - name: KC_DB_URL
+          value: jdbc:postgresql://keycloak-postgres-service:5432/keycloak
+        - name: KC_DB_USERNAME
+          value: keycloak
+        - name: KC_DB_PASSWORD
+          value: keycloak
+        - name: KC_HOSTNAME
+          value: platform-auth.127.0.0.1.sslip.io
+        - name: KC_HOSTNAME_STRICT
+          value: "false"
+        - name: KC_HTTP_ENABLED
+          value: "true"
+        - name: KC_HOSTNAME_STRICT_HTTPS
+          value: "false"
+        - name: KC_PROXY
+          value: "edge"
+        # Global CORS configuration
+        - name: KC_HTTP_CORS_ENABLED
+          value: "true"
+        - name: KC_HTTP_CORS_ORIGINS
+          value: "http://teams-ui.127.0.0.1.sslip.io,http://localhost:4200,*"
+        - name: KC_HTTP_CORS_METHODS
+          value: "GET,POST,PUT,DELETE,OPTIONS,HEAD"
+        - name: KC_HTTP_CORS_HEADERS
+          value: "*"
+        - name: KC_HTTP_CORS_EXPOSED_HEADERS
+          value: "*"
+        - name: KC_HTTP_CORS_MAX_AGE
+          value: "3600"
+        - name: KC_HTTP_CORS_ALLOW_CREDENTIALS
+          value: "true"
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /realms/master
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /realms/master
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: keycloak-realm
+          mountPath: /opt/keycloak/data/import
+          readOnly: true
+      volumes:
+      - name: keycloak-realm
+        configMap:
+          name: keycloak-realm-config
+
+---
+# k8s/keycloak-cors-middleware.yaml (Universal CORS middleware)
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: cors
+  namespace: keycloak
+spec:
+  headers:
+    customRequestHeaders:
+      Access-Control-Allow-Origin: "*"
+      Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,OPTIONS,HEAD,PATCH"
+      Access-Control-Allow-Headers: "*"
+      Access-Control-Allow-Credentials: "true"
+      Access-Control-Max-Age: "3600"
+    customResponseHeaders:
+      Access-Control-Allow-Origin: "*"
+      Access-Control-Allow-Methods: "GET,POST,PUT,DELETE,OPTIONS,HEAD,PATCH"
+      Access-Control-Allow-Headers: "*"
+      Access-Control-Allow-Credentials: "true"
+      Access-Control-Max-Age: "3600"
+    accessControlAllowMethods:
+      - "*"
+    accessControlAllowOriginListRegex:
+      - ".*"
+    accessControlAllowHeaders:
+      - "*"
+    accessControlExposeHeaders:
+      - "*"
+    accessControlAllowCredentials: true
+    accessControlMaxAge: 3600

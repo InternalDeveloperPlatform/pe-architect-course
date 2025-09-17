@@ -1,0 +1,19 @@
+# k8s/teams-ui-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: teams-ui-service
+  namespace: engineering-platform
+  labels:
+    app: teams-ui
+    component: frontend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: teams-ui
+

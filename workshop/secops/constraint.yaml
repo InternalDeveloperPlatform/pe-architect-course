@@ -1,0 +1,23 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: FalcoRootPrevention
+metadata:
+  name: enforce-falco-root-prevention
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+      - apiGroups: ["apps"]
+        kinds: ["Deployment"]
+    namespaces: ["default", "production", "staging", "engineering-platform"]
+  parameters:
+    exemptNamespaces:
+      - "kube-system"
+      - "kube-public"
+      - "gatekeeper-system"
+    exemptImages:
+      - "registry.k8s.io/"
+      - "gcr.io/distroless/"
+    exemptUsers:
+      - "1000"
+      - "65534"

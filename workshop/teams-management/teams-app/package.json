@@ -1,0 +1,48 @@
+{
+  "name": "teams-ui",
+  "version": "1.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "build:prod": "ng build --configuration=production",
+    "serve:prod": "ng serve --configuration=production",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "docker:build": "docker build -t teams-ui:latest .",
+    "k8s:deploy": "kubectl apply -f k8s/",
+    "k8s:delete": "kubectl delete -f k8s/",
+    "dev": "ng serve --proxy-config proxy.conf.json --host 0.0.0.0 --disable-host-check",
+    "dev:cors": "ng serve --proxy-config proxy.conf.json --host 0.0.0.0 --disable-host-check --ssl false"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^16.2.0",
+    "@angular/common": "^16.2.0",
+    "@angular/compiler": "^16.2.0",
+    "@angular/core": "^16.2.0",
+    "@angular/forms": "^16.2.0",
+    "@angular/platform-browser": "^16.2.0",
+    "@angular/platform-browser-dynamic": "^16.2.0",
+    "@angular/router": "^16.2.0",
+    "keycloak-angular": "^14.2.0",
+    "keycloak-js": "^22.0.1",
+    "rxjs": "~7.8.1",
+    "tslib": "^2.6.0",
+    "zone.js": "~0.13.1"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^16.2.0",
+    "@angular/cli": "~16.2.0",
+    "@angular/compiler-cli": "^16.2.0",
+    "@types/jasmine": "~4.3.0",
+    "@types/node": "^18.15.0",
+    "jasmine-core": "~4.6.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "typescript": "~5.1.3"
+  }
+}

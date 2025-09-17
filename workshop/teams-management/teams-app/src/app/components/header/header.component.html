@@ -1,0 +1,30 @@
+<header class="header">
+  <div class="header-content">
+    <div class="header-left">
+      <h1>Engineering Platform</h1>
+      <p class="subtitle">Teams Management</p>
+    </div>
+
+    <div class="header-right" *ngIf="isLoggedIn">
+      <div class="user-info">
+        <span class="welcome-text">
+          Welcome, {{ userProfile?.firstName || userProfile?.username }}!
+        </span>
+        <div class="user-roles" *ngIf="userRoles.length > 0">
+          <span class="role-badge" *ngFor="let role of userRoles">
+            {{ role }}
+          </span>
+        </div>
+      </div>
+      <button class="btn btn-secondary" (click)="logout()">
+        Logout
+      </button>
+    </div>
+
+    <div class="header-right" *ngIf="!isLoggedIn">
+      <button class="btn btn-primary" (click)="login()">
+        Login
+      </button>
+    </div>
+  </div>
+</header>

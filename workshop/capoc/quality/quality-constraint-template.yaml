@@ -1,0 +1,48 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: codecoveragesimple
+spec:
+  crd:
+    spec:
+      names:
+        kind: CodeCoverageSimple
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            coverageData:
+              type: object
+              description: "Coverage data as key-value pairs"
+            minimumCoverage:
+              type: number
+              default: 80
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package codecoverage
+
+        violation[{"msg": msg}] {
+          input.review.object.kind == "Deployment"
+          sha := input.review.object.metadata.annotations["commit-sha"]
+
+          # Get coverage from constraint parameters
+          coverage := input.parameters.coverageData[sha]
+          minimum := input.parameters.minimumCoverage
+
+          coverage < minimum
+          msg := sprintf("Code coverage %v%% is below required minimum of %v%% for commit %v", [coverage, minimum, sha])
+        }
+
+        violation[{"msg": msg}] {
+          input.review.object.kind == "Deployment"
+          not input.review.object.metadata.annotations["commit-sha"]
+          msg := "Missing required annotation: commit-sha"
+        }
+
+        violation[{"msg": msg}] {
+          input.review.object.kind == "Deployment"
+          sha := input.review.object.metadata.annotations["commit-sha"]
+          not input.parameters.coverageData[sha]
+          msg := sprintf("No coverage data found for commit %v", [sha])
+        }

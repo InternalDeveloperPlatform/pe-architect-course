@@ -1,0 +1,51 @@
+# # k8s/ingress.yaml
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: engineering-platform-ingress
+#   namespace: engineering-platform
+#   annotations:
+#     nginx.ingress.kubernetes.io/rewrite-target: /
+#     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+#     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+#     nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization"
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#   - host: engineering-platform.local
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: teams-ui-service
+#             port:
+#               number: 80
+#       - path: /api
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: teams-api-service
+#             port:
+#               number: 8000
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: teams-ui-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: teams-ui.127.0.0.1.sslip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: teams-ui-service
+            port:
+              number: 80

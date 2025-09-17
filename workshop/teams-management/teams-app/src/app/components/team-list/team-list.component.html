@@ -1,0 +1,38 @@
+<!-- src/app/components/team-list/team-list.component.html -->
+<div class="team-list">
+  <div class="loading" *ngIf="isLoading">
+    Loading teams...
+  </div>
+
+  <div class="error-message" *ngIf="errorMessage && !isLoading">
+    {{ errorMessage }}
+    <button class="btn btn-secondary" (click)="loadTeams()">Retry</button>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && !errorMessage && teams.length === 0">
+    <p>No teams created yet. Create your first team above!</p>
+  </div>
+
+  <div class="teams-grid" *ngIf="!isLoading && !errorMessage && teams.length > 0">
+    <div class="team-card" *ngFor="let team of teams">
+      <div class="team-header">
+        <h3 class="team-name">{{ team.name }}</h3>
+        <button
+          class="btn btn-danger btn-sm"
+          (click)="deleteTeam(team.id, team.name)"
+          title="Delete team"
+        >
+          Delete
+        </button>
+      </div>
+      <div class="team-details">
+        <p class="team-id">ID: {{ team.id }}</p>
+        <p class="team-created">Created: {{ formatDate(team.created_at) }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="teams-count" *ngIf="!isLoading && teams.length > 0">
+    Total teams: {{ teams.length }}
+  </div>
+</div>

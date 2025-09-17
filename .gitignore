@@ -1,5 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,jetbrains+all,terraform,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,visualstudiocode,jetbrains+all,terraform,cmake
+node_modules/
+.angular/
 
 ### CMake ###
 CMakeLists.txt.user

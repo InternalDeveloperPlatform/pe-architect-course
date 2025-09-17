@@ -1,0 +1,115 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: falcorootprevention
+spec:
+  crd:
+    spec:
+      names:
+        kind: FalcoRootPrevention
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            exemptUsers:
+              type: array
+              items:
+                type: string
+            exemptImages:
+              type: array
+              items:
+                type: string
+            exemptNamespaces:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package falco.root.prevention
+
+        is_exempt_image(image) {
+          exempt := input.parameters.exemptImages[_]
+          contains(image, exempt)
+        }
+
+        is_exempt_namespace(namespace) {
+          exempt := input.parameters.exemptNamespaces[_]
+          namespace == exempt
+        }
+
+        containers[container] {
+          input.review.object.kind == "Pod"
+          container := input.review.object.spec.containers[_]
+        }
+
+        containers[container] {
+          input.review.object.kind == "Deployment"
+          container := input.review.object.spec.template.spec.containers[_]
+        }
+
+        get_pod_security_context = security_context {
+          input.review.object.kind == "Pod"
+          security_context := object.get(input.review.object.spec, "securityContext", {})
+        }
+
+        get_pod_security_context = security_context {
+          input.review.object.kind != "Pod"
+          security_context := object.get(input.review.object.spec.template.spec, "securityContext", {})
+        }
+
+        # Helper to get effective user ID
+        get_effective_user(container) = user {
+          container_security := object.get(container, "securityContext", {})
+          container_user := object.get(container_security, "runAsUser", null)
+          container_user != null
+          user := container_user
+        }
+
+        get_effective_user(container) = user {
+          container_security := object.get(container, "securityContext", {})
+          container_user := object.get(container_security, "runAsUser", null)
+          container_user == null
+          pod_security := get_pod_security_context
+          pod_user := object.get(pod_security, "runAsUser", null)
+          pod_user != null
+          user := pod_user
+        }
+
+        get_effective_user(container) = -1 {
+          container_security := object.get(container, "securityContext", {})
+          container_user := object.get(container_security, "runAsUser", null)
+          container_user == null
+          pod_security := get_pod_security_context
+          pod_user := object.get(pod_security, "runAsUser", null)
+          pod_user == null
+        }
+
+        violation[{"msg": msg}] {
+          not is_exempt_namespace(input.review.object.metadata.namespace)
+          container := containers[_]
+          not is_exempt_image(container.image)
+
+          effective_user := get_effective_user(container)
+
+          # Check if running as root (0) or no user specified (-1 = defaults to root)
+          any([
+            effective_user == 0,
+            effective_user == -1
+          ])
+
+          msg := sprintf("Container %v is configured to run as root (UID: %v). Falco security policy violation.", [container.name, effective_user])
+        }
+
+        violation[{"msg": msg}] {
+          not is_exempt_namespace(input.review.object.metadata.namespace)
+          container := containers[_]
+          not is_exempt_image(container.image)
+
+          container_security := object.get(container, "securityContext", {})
+          privileged := object.get(container_security, "privileged", false)
+
+          privileged == true
+
+          msg := sprintf("Container %v is running in privileged mode. Falco security policy violation.", [container.name])
+        }
