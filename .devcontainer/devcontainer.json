@@ -4,7 +4,6 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
     }
   },
-  "postCreateCommand": ".devcontainer/postCreateCommand.sh",
   "workspaceFolder": "/home/vscode/pe-course-architect",
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/pe-course-architect,type=bind",
   "hostRequirements": {
