@@ -119,21 +119,49 @@ helm install grafana-stack prometheus-community/kube-prometheus-stack \
 kubectl get pods -n monitoring
 ```
 
-### Step 4: Access Grafana -
+### Step 4: Access Grafana
 
-# TODO - Proxy port forwarding in coder.com
-
+**Option 1: Port Forwarding (Recommended for Local Development)**
 ```bash
-# Get Grafana admin password (if you didn't set one)
+# Forward Grafana service to local port 3000
+kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+
+# Keep this terminal window open and open a new terminal for other commands
+# Access at: http://localhost:3000
+```
+
+**Option 2: NodePort Service (If Configured)**
+```bash
+# Access via NodePort (if you configured it in the values file)
+# URL: http://localhost:30300
+```
+
+**Option 3: For Coder.com Environments**
+```bash
+# In Coder environments, use the built-in proxy
+# Forward the port and access via the Coder proxy URL
+kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+
+# The Coder interface will show the forwarded port
+# Click on the port to access Grafana through the proxy
+```
+
+**Getting Admin Credentials**
+```bash
+# Get the admin password (if you didn't set a custom one)
 kubectl get secret -n monitoring grafana-stack-grafana \
   -o jsonpath="{.data.admin-password}" | base64 --decode && echo
 
-# Access Grafana via port-forward
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
-
-# Or access via NodePort (if configured)
-# http://localhost:30300
+# Default credentials from our setup:
+# Username: admin
+# Password: admin123
 ```
+
+**Verify Grafana Access**
+1. Open your browser to the Grafana URL
+2. Login with admin credentials
+3. You should see the Grafana dashboard
+4. Navigate to "Dashboards" → "Browse" to see pre-installed dashboards
 
 **Default Credentials:**
 - Username: `admin`
@@ -233,61 +261,277 @@ kubectl apply -f simple-ns-with-label.yaml
 ```
 
 
+
 ---
 
-## Verification Steps
+## ✅ Verification Steps
 
-### Verify Complete Setup
+### Step 1: Verify Complete Setup
 
+**Check Core Components**
 ```bash
-# Check all namespaces
-kubectl get namespaces
+# Verify all namespaces are created
+kubectl get namespaces | grep -E "(monitoring|gatekeeper-system)"
 
-# Check nodes
+# Expected output:
+# gatekeeper-system   Active   2m
+# monitoring          Active   5m
+
+# Check cluster health
 kubectl get nodes
-
-# Check all pods across namespaces
-kubectl get pods --all-namespaces
-
-# Check services
-kubectl get services --all-namespaces
+kubectl cluster-info
 ```
 
-### Resource Usage Check
+**Verify Monitoring Stack**
+```bash
+# Check all monitoring pods are running
+kubectl get pods -n monitoring
+
+# All pods should show "Running" or "Completed" status
+# Wait for all pods to be ready (this may take 2-3 minutes)
+kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=grafana -n monitoring --timeout=300s
+```
+
+**Verify Gatekeeper**
+```bash
+# Check Gatekeeper pods
+kubectl get pods -n gatekeeper-system
+
+# Expected output (all should be Running):
+# gatekeeper-audit-xxx                 1/1     Running   0          2m
+# gatekeeper-controller-manager-xxx    1/1     Running   0          2m
+# gatekeeper-policy-manager-xxx        1/1     Running   0          2m
+
+# Verify constraint template is working
+kubectl get constrainttemplates
+
+# Should show: k8srequiredlabels
+
+# Verify constraint is active
+kubectl get constraints
+
+# Should show: K8sRequiredLabels/ns-must-have-gk
+```
+
+### Step 2: Test the Complete Workflow
+
+**Test Grafana Dashboard**
+```bash
+# Forward the port (run in separate terminal)
+kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+
+# In your browser, go to http://localhost:3000
+# Login with admin/admin123
+# You should see dashboards under "Dashboards" → "Browse"
+```
+
+**Test Gatekeeper Policy**
+```bash
+# This should FAIL (demonstrating the policy works)
+kubectl create namespace test-fail
+
+# Expected error: admission webhook "validation.gatekeeper.sh" denied the request
+
+# This should SUCCEED
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-success
+  labels:
+    admission: "allowed"
+EOF
+
+# Cleanup test namespace
+kubectl delete namespace test-success
+```
+
+### Step 3: Resource Usage Check
 
 ```bash
 # Check resource usage
 kubectl top nodes
 kubectl top pods --all-namespaces
+
+# Ensure your cluster isn't overloaded
+# Memory usage should be under 80%
+# CPU usage should be reasonable
 ```
 
-#### Common Issues
+### IMPORTANT: Remove the constraint after testing
 
-1. **Pods stuck in Pending state**
+We will be deploying Falco later on in the project, and it will not have the namespace label "admission" in it by default. Since the above constraint was just for verifying gatekeeper is working properly, we can now safely remove the constraints. We will use other more complex constraints in the next module.
+
+Note: You can leave the constraint-template deployed it you want to play around with other namespace constraints. The only thing that actually *blocks* namespace creation is the constraint itself (which depends on the constraint template as a CRD).
+
+```bash
+kubectl delete -f simple-ns-with-label.yaml
+kubectl delete -f simple-constraint.yaml
+```
+
+### ✅ Success Criteria
+
+Your foundation setup is complete when:
+- [ ] All monitoring pods are in "Running" state
+- [ ] All gatekeeper pods are in "Running" state
+- [ ] Grafana dashboard is accessible at http://localhost:3000
+- [ ] You can login to Grafana with admin/admin123
+- [ ] Constraint template `k8srequiredlabels` exists
+- [ ] Constraint `ns-must-have-gk` is active
+- [ ] Creating namespace without required label fails
+- [ ] Creating namespace with required label succeeds
+- [ ] Resource usage is reasonable (< 80% memory)
+- [ ] Remove constraint `ns-must-have-gk` after you finish testing
+
+## 🚨 Troubleshooting
+
+### Common Issues and Solution`
+
+#### 1. Pods Stuck in Pending State
+**Symptoms**: Pods show `Pending` status for extended periods
+
+**Diagnosis**:
+```bash
+# Check pod details for scheduling issues
+kubectl describe pod <pod-name> -n <namespace>
+
+# Check node resources
+kubectl describe nodes
+kubectl top nodes
+```
+
+**Solutions**:
+```bash
+# If resource constraints, scale down other components
+kubectl scale deployment -n monitoring grafana-stack-prometheus-node-exporter --replicas=1
+
+# Or increase cluster resources (add nodes, increase limits)
+```
+
+#### 2. Gatekeeper Not Enforcing Policies
+**Symptoms**: Can create resources that should be blocked
+
+**Diagnosis**:
+```bash
+# Check if Gatekeeper is running
+kubectl get pods -n gatekeeper-system
+
+# Verify templates and constraints exist
+kubectl get constrainttemplates
+kubectl get constraints
+
+# Check constraint status
+kubectl describe constraint ns-must-have-gk
+```
+
+**Solutions**:
+```bash
+# Restart Gatekeeper if needed
+kubectl rollout restart deployment -n gatekeeper-system gatekeeper-controller-manager
+
+# Re-apply templates if missing
+kubectl apply -f simple-constraint-template.yaml
+kubectl apply -f simple-constraint.yaml
+```
+
+#### 3. Grafana Dashboard Not Accessible
+**Symptoms**: Cannot connect to http://localhost:3000
+
+**Diagnosis**:
+```bash
+# Check if Grafana pod is running
+kubectl get pods -n monitoring | grep grafana
+
+# Check service exists
+kubectl get service -n monitoring grafana-stack-grafana
+
+# Check logs for errors
+kubectl logs -n monitoring deployment/grafana-stack-grafana
+```
+
+**Solutions**:
+```bash
+# Restart port-forward
+kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+
+# Or try different port if 3000 is busy
+kubectl port-forward -n monitoring service/grafana-stack-grafana 3001:80
+
+# Check if password is correct
+kubectl get secret -n monitoring grafana-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode && echo
+```
+
+#### 4. High Resource Usage / Cluster Overloaded
+**Symptoms**: High CPU/memory usage, pods failing to start
+
+**Diagnosis**:
+```bash
+# Check resource usage
+kubectl top nodes
+kubectl top pods --all-namespaces
+
+# Check events for resource issues
+kubectl get events --sort-by='.lastTimestamp'
+```
+
+**Solutions**:
+```bash
+# Scale down resource-intensive components
+kubectl scale deployment -n monitoring grafana-stack-prometheus-node-exporter --replicas=0
+kubectl scale deployment -n monitoring grafana-stack-kube-state-metrics --replicas=0
+
+# Reduce Prometheus retention period
+helm upgrade grafana-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --set prometheus.prometheusSpec.retention=3d
+
+# Or completely restart with minimal resources
+helm uninstall grafana-stack -n monitoring
+# Then reinstall with the values file (lower resource limits)
+```
+
+#### 5. Helm Installation Fails
+**Symptoms**: `helm install` command fails
+
+**Common Solutions**:
+```bash
+# Update helm repositories
+helm repo update
+
+# Check if namespace exists
+kubectl create namespace monitoring --dry-run=client -o yaml
+
+# Try installation with timeout
+helm install grafana-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --values grafana-stack-values.yaml \
+  --wait \
+  --timeout=600s
+```
+
+### Getting Additional Help
+
+1. **Check pod logs in detail**:
+   ```bash
+   kubectl logs -f <pod-name> -n <namespace>
+   kubectl logs --previous <pod-name> -n <namespace>  # Previous container logs
+   ```
+
+2. **Describe resources for events**:
    ```bash
    kubectl describe pod <pod-name> -n <namespace>
-   # Check for resource constraints or node issues
+   kubectl describe service <service-name> -n <namespace>
    ```
 
-2. **Gatekeeper not enforcing policies**
+3. **Check cluster events**:
    ```bash
-   kubectl get constrainttemplates
-   kubectl get constraints
-   kubectl describe constraint <constraint-name>
+   kubectl get events --sort-by='.lastTimestamp' --all-namespaces
    ```
 
-3. **Grafana not accessible**
+4. **Verify RBAC permissions** (if using restricted clusters):
    ```bash
-   kubectl get pods -n monitoring | grep grafana
-   kubectl logs -n monitoring deployment/grafana-stack-grafana
-   ```
-
-4. **High resource usage**
-   ```bash
-   # Reduce Prometheus retention
-   helm upgrade grafana-stack prometheus-community/kube-prometheus-stack \
-     --namespace monitoring \
-     --set prometheus.prometheusSpec.retention=3d
+   kubectl auth can-i create pods --namespace monitoring
+   kubectl auth can-i get secrets --namespace monitoring
    ```
 
 #### Resource Optimization
@@ -313,6 +557,57 @@ kubectl delete namespace monitoring
 kubectl delete -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.14/deploy/gatekeeper.yaml
 ```
 
-This completes your Kubernetes sandbox setup with monitoring and policy management capability
+---
 
-The next module is `capoc/cve`
+## 🎉 Foundation Complete!
+
+Congratulations! You have successfully set up your engineering platform foundation with:
+
+✅ **Kubernetes cluster** ready for development
+✅ **Grafana monitoring stack** with dashboards and metrics
+✅ **OPA Gatekeeper** enforcing policy-as-code
+✅ **Health checks** and verification steps completed
+
+## 🎯 Next Steps
+
+Now that your foundation is solid, you can proceed to any of the specialized modules:
+
+### Recommended Next Module: CapOc (Compliance at Point of Change)
+**Path**: [`../capoc/README.md`](../capoc/README.md)
+- Learn about CVE scanning and vulnerability management
+- Implement code quality gates and enforcement
+- Practice with constraint templates and policies
+
+### Alternative Paths:
+
+**Security Operations**: [`../secops/README.md`](../secops/README.md)
+- Deploy Falco for runtime security monitoring
+- Create custom security rules and alerts
+- Monitor for security threats and anomalies
+
+**Teams Management**: [`../teams-management/`](../teams-management/)
+- Build RESTful APIs for team management
+- Create command-line tools for developers
+- Deploy full-stack applications with Angular UI
+
+### Quick Reference
+
+**Accessing Your Services:**
+```bash
+# Grafana Dashboard
+kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+# Then visit: http://localhost:3000 (admin/admin123)
+
+# Check all services
+kubectl get services --all-namespaces
+
+# Monitor cluster health
+kubectl get pods --all-namespaces
+```
+
+**Key Files Created:**
+- `grafana-stack-values.yaml` - Grafana configuration
+- `simple-constraint-template.yaml` - Policy template
+- `simple-constraint.yaml` - Namespace policy
+
+Ready to continue your engineering platform journey? Choose your next module above! 🚀
