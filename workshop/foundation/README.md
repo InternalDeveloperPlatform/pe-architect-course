@@ -121,40 +121,42 @@ kubectl get pods -n monitoring
 
 ### Step 4: Access Grafana
 
-**Option 1: Port Forwarding (Recommended for Local Development)**
-```bash
-# Forward Grafana service to local port 3000
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+#### Install coder desktop
+To access port-forwarded resources, you need to first install coder desktop.
 
-# Keep this terminal window open and open a new terminal for other commands
-# Access at: http://localhost:3000
-```
+Please follow the instructions here:
+https://coder.com/docs/user-guides/desktop
 
-**Option 2: NodePort Service (If Configured)**
-```bash
-# Access via NodePort (if you configured it in the values file)
-# URL: http://localhost:30300
-```
+Coder desktop provides easy access to your resources over a secure VPN tunnel.
 
-**Option 3: For Coder.com Environments**
 ```bash
 # In Coder environments, use the built-in proxy
 # Forward the port and access via the Coder proxy URL
 kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
 
-# The Coder interface will show the forwarded port
-# Click on the port to access Grafana through the proxy
+# Navigate to
+http://<workspace-name>.coder:3000/grafana
 ```
+
+#### Note - Workspace URL
+
+To access the workspace url, click the coder desktop app icon, and copy the url name.
+
+Or, just construct the url as follows:
+
+http://<workspace-name>.coder
+
+So if your workspace name is student123 your url is http://student123.coder:3000/grafana
 
 **Getting Admin Credentials**
 ```bash
-# Get the admin password (if you didn't set a custom one)
-kubectl get secret -n monitoring grafana-stack-grafana \
-  -o jsonpath="{.data.admin-password}" | base64 --decode && echo
-
 # Default credentials from our setup:
 # Username: admin
 # Password: admin123
+
+# Get the admin password (if you didn't set a custom one)
+kubectl get secret -n monitoring grafana-stack-grafana \
+  -o jsonpath="{.data.admin-password}" | base64 --decode && echo
 ```
 
 **Verify Grafana Access**
@@ -168,6 +170,13 @@ kubectl get secret -n monitoring grafana-stack-grafana \
 - Password: `admin123` (or the value from the secret)
 
 ---
+
+## Verify Grafana Setup
+
+Navigate to: Dashboards > Kubernetes / Compute Resources / Namespace (Pods)
+Select: Namespace > monitoring
+
+You should now see Grafana metrics for the monitoring namespace.
 
 ## Installing Gatekeeper
 
@@ -611,3 +620,4 @@ kubectl get pods --all-namespaces
 - `simple-constraint.yaml` - Namespace policy
 
 Ready to continue your engineering platform journey? Choose your next module above! 🚀
+
