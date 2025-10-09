@@ -116,16 +116,16 @@ For local development and testing:
 
 ```bash
 # Port forward the service to your local machine
-kubectl port-forward -n teams-api svc/teams-api-service 8080:80
+kubectl port-forward -n teams-api svc/teams-api-service 8080:4200
 
 # Keep this terminal open and use a new terminal for API calls
-# The API will be available at: http://localhost:8080
+# The API will be available at: http://<workspace-name>.coder:3002
 ```
 
 **Verify the port forward is working**:
 ```bash
 # Test basic connectivity
-curl http://localhost:8080/health
+curl http://<workspace-name>.coder:3002/health
 
 # Expected response:
 # {"status": "healthy", "message": "Teams API is running", "teams_count": 0}
@@ -151,6 +151,15 @@ Once the API is running, access the interactive documentation:
 # Or access the ReDoc version:
 # http://localhost:8080/redoc
 ```
+
+### Observability
+
+Go to your Grafana instance ( http://<workspace-name>.coder:3000/grafana )
+
+Navigate to: Kubernetes / Compute Resources / Namespace (Workloads)
+Select "Engineering Platform" in the Namspace dropdown.
+
+Here you will see our engineering platform deployed pods and workloads.
 
 ### API Endpoints
 
