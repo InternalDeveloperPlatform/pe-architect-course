@@ -208,7 +208,7 @@ kubectl get pods -n gatekeeper-system
 ### Verify gatekeeper install worked.
 
 Deploy a simple constraint template
-`k apply -f simple-constraint-template.yaml`
+`kubectl apply -f simple-constraint-template.yaml`
 
 ``` yaml
 apiVersion: templates.gatekeeper.sh/v1
@@ -243,7 +243,7 @@ spec:
         }
 ```
 
-`k apply -f simple-constraint.yaml`
+`kubectl apply -f simple-constraint.yaml`
 
 ``` yaml
 apiVersion: constraints.gatekeeper.sh/v1beta1
@@ -326,8 +326,8 @@ kubectl get constraints
 
 **Test Grafana Dashboard**
 ```bash
-# Forward the port (run in separate terminal)
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+# Forward the port (run in a separate terminal)
+kubectl port-forward -n monitoring service/grafana-stack 3000:80
 
 # In your browser, go to http://localhost:3000
 # Login with admin/admin123
