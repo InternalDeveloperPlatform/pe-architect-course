@@ -132,7 +132,7 @@ Coder desktop provides easy access to your resources over a secure VPN tunnel.
 ```bash
 # In Coder environments, use the built-in proxy
 # Forward the port and access via the Coder proxy URL
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+kubectl port-forward -n monitoring service/grafana-stack 3000:80
 
 # Navigate to
 http://<workspace-name>.coder:3000/grafana
