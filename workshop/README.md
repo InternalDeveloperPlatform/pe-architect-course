@@ -51,7 +51,7 @@ python3 --version
 # Check Node.js
 node --version
 ```
-
+Sometimes, you might find that some of these are missing. Use apt-get, and / or curl to try and update these packages as you would do it on your local laptop environment.
 ## 🚀 Getting Started
 
 **⚠️ IMPORTANT: Start with the Foundation module first!**
