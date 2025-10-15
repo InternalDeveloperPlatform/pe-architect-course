@@ -127,6 +127,7 @@ To access port-forwarded resources, you need to first install coder desktop.
 Please follow the instructions here:
 https://coder.com/docs/user-guides/desktop
 
+(Basically, you need to do 2 things in the instructions above. Use ```brew install --cask coder/coder/coder-desktop``` and then ```ssh <yourinstance>.code```)
 Coder desktop provides easy access to your resources over a secure VPN tunnel.
 
 ```bash
