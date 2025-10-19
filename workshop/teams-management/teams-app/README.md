@@ -45,7 +45,7 @@ A modern Angular web application for managing engineering teams, designed to int
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd teams-ui
+cd teams-app
 
 # Install dependencies
 npm install
@@ -76,7 +76,7 @@ chmod +x deploy.sh
 ## 📁 Project Structure
 
 ```
-teams-ui/
+teams-app/
 ├── src/
 │   ├── app/
 │   │   ├── components/
