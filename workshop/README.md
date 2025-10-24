@@ -8,6 +8,7 @@ Welcome to the companion repo for PlatformEngineering.org Architect! This hands-
 - Size(small): update coder.com template code to reference new github url after this repo is moved to peorg github
 - Size(small): create helper cli script, that lets users deploy/teardown foundation setup or other modules automatically, so they can catchup to current module if they missed a week and need to jump to current
 - Size(small): not clear if installing locally or inside of coder - move coder desktop setup to beginning
+- Size(small): git pull from github.com failing on certificate
 
 
 ## 🎯 Learning Objectives
