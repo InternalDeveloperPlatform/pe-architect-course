@@ -12,18 +12,6 @@ This guide will walk you through setting up a complete Kubernetes development en
 
 ## Installing Grafana Stack
 
-### Prerequisite
-
-Install Helm:
-
-```bash
-curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-chmod 700 get_helm.sh
-./get_helm.sh
-```
-
-The Grafana stack includes Prometheus, Grafana, AlertManager, and other monitoring tools.
-
 ### Step 1: Add Helm Repository
 
 ```bash

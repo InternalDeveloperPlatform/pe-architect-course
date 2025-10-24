@@ -4,14 +4,10 @@ Welcome to the companion repo for PlatformEngineering.org Architect! This hands-
 
 ## DOCS and MODULE TODOS
 
-- Size(small): Test and update guide on using coder.com proxy (accessing grafana and teams app ui)
-- Size(small): Change docs and source from using Traefik Ingress to Nginx Ingress (or modify k8s spinup to put traefik)
 - Size(small): Run end to end through updated docs, checking for errors/mistakes/not working things/etc.
-- Size(medium): Verify/Modify Keycloak deployment in last module to work with coder.com environment
-- Size(small): Migrate repos/code to peorg github repos and off personal
 - Size(small): update coder.com template code to reference new github url after this repo is moved to peorg github
-- Size(medium): reference back to workshop content (i.e. little context sections "when you learned about x, this is relevant to it" etc.)
-- Size(medium): create helper cli script, that lets users deploy/teardown foundation setup or other modules automatically, so they can catchup to current module if they missed a week and need to jump to current
+- Size(small): create helper cli script, that lets users deploy/teardown foundation setup or other modules automatically, so they can catchup to current module if they missed a week and need to jump to current
+- Size(small): not clear if installing locally or inside of coder - move coder desktop setup to beginning
 
 
 ## 🎯 Learning Objectives
@@ -33,6 +29,18 @@ Optional:
 
 ### Required Software
 - None: We will use coder.com environments
+
+### Prerequisite
+
+Install Helm:
+
+```bash
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+```
+
+The Grafana stack includes Prometheus, Grafana, AlertManager, and other monitoring tools.
 
 ### Verify Prerequisites
 ```bash
@@ -62,7 +70,7 @@ Sometimes, you might find that some of these are missing. Use apt-get, and / or 
 
 ## 📚 Workshop Modules
 
-### 1. 🏗️ Foundation (`foundation/`) - **START HERE**
+### 1. 🏗️ Foundation (`01_foundation/`) - **START HERE**
 
 Contains the fundamental setup for your Kubernetes environment including:
 - Kubernetes cluster verification
@@ -194,3 +202,4 @@ kubectl scale deployment <deployment-name> --replicas=1
 ---
 
 **Ready to begin?** 🎯 Head to the [`foundation/README.md`](foundation/README.md) to start your engineering platform journey!
+
