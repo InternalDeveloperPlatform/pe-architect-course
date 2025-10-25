@@ -1,4 +1,4 @@
-# Engineering Platform Workshop
+# Platform Engineering Architect Course
 
 Welcome to the companion repo for PlatformEngineering.org Architect! This hands-on set of mini-projects will have you do exercises for building platform concepts you learn about in the course with monitoring, policy management, security operations, and team management capabilities.
 
