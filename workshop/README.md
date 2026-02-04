@@ -23,6 +23,9 @@ Optional:
 ### Required Software
 - None: We will use coder.com environments
 
+### Recommended supplemental material
+- Recommended, not required - [Effective Platform Engineering](https://effectiveplatformengineering.com)
+
 ### Prerequisite
 
 Install Helm:
