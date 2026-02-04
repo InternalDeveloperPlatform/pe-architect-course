@@ -444,9 +444,9 @@ Upon completing this module, you will have built a complete engineering platform
 - **Developer Experience**: Creating intuitive, scriptable tools
 - **System Integration**: Connecting multiple components seamlessly
 
-**Ready to build platforms that developers love?** 🚀 Your teams management system is now a foundation for building comprehensive engineering platforms that scale with your organization!
-**Share what you learned with yoiur team** [Click here](https://pe-architect.platformetrics.com/) for a high-level demo
-**Check out our book on platform engineering that talks architecture** [Effective Platform Engineering](https://effectiveplatformengineering.com) 
+**Ready to build platforms that developers love?** 🚀 Your teams management system is now a foundation for building comprehensive engineering platforms that scale with your organization!  
+**Share what you learned with yoiur team** [Click here](https://pe-architect.platformetrics.com/) for a high-level demo  
+**Check out our book on platform engineering that talks architecture** [Effective Platform Engineering](https://effectiveplatformengineering.com)   
 
 ---
 
