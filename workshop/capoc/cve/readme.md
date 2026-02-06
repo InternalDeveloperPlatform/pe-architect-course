@@ -179,13 +179,13 @@ cat deployment-working.yaml
 **1. Template and Constraint Status**:
 ```bash
 # Verify template exists
-kubectl get constrainttemplates | grep -i cve
+kubectl get constrainttemplates | grep -i vuln
 
 # Verify constraint exists and is enforcing
-kubectl get constraints | grep -i cve
+kubectl get constraints | grep -i vuln
 
 # Check constraint status for any issues
-kubectl describe constraint <cve-constraint-name>
+kubectl describe constraint -f cve-constraint.yaml
 ```
 
 **2. Policy Enforcement Test**:
@@ -268,7 +268,7 @@ spec:
 **Issue: Constraint not enforcing**
 ```bash
 # Check constraint status
-kubectl describe constraint <constraint-name>
+kubectl describe constraint -f cve-constraint.yaml
 
 # Look for errors in the status section
 # Common causes: template syntax errors, invalid parameters
@@ -277,7 +277,7 @@ kubectl describe constraint <constraint-name>
 **Issue: All deployments blocked**
 ```bash
 # Check if thresholds are too restrictive
-kubectl get constraint <constraint-name> -o yaml
+kubectl get constraint -f cve-constraint.yaml -o yaml
 
 # Consider adjusting maxHigh, maxMedium values
 ```
