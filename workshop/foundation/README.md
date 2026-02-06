@@ -124,7 +124,7 @@ Coder desktop provides easy access to your resources over a secure VPN tunnel.
 kubectl port-forward -n monitoring service/grafana-stack 3000:80
 
 # Navigate to
-http://<workspace-name>.coder:3000/grafana
+`http://<workspace-name>.coder:3000/grafana`
 ```
 
 #### Note - Workspace URL
@@ -133,9 +133,9 @@ To access the workspace url, click the coder desktop app icon, and copy the url 
 
 Or, just construct the url as follows:
 
-http://<workspace-name>.coder
+`http://<workspace-name>.coder:3000`
 
-So if your workspace name is student123 your url is http://student123.coder:3000/grafana
+So if your workspace name is student123 your url is http://student123.coder:3000/
 
 **Getting Admin Credentials**
 ```bash
@@ -318,7 +318,7 @@ kubectl get constraints
 # Forward the port (run in a separate terminal)
 kubectl port-forward -n monitoring service/grafana-stack 3000:80
 
-# In your browser, go to http://localhost:3000
+# In your browser, go to http://<workspace-name>.coder:3000
 # Login with admin/admin123
 # You should see dashboards under "Dashboards" → "Browse"
 ```
@@ -372,7 +372,7 @@ kubectl delete -f simple-constraint.yaml
 Your foundation setup is complete when:
 - [ ] All monitoring pods are in "Running" state
 - [ ] All gatekeeper pods are in "Running" state
-- [ ] Grafana dashboard is accessible at http://localhost:3000
+- [ ] Grafana dashboard is accessible at `http://<workspace-name>.coder:3000`
 - [ ] You can login to Grafana with admin/admin123
 - [ ] Constraint template `k8srequiredlabels` exists
 - [ ] Constraint `ns-must-have-gk` is active
@@ -433,7 +433,7 @@ kubectl apply -f simple-constraint.yaml
 ```
 
 #### 3. Grafana Dashboard Not Accessible
-**Symptoms**: Cannot connect to http://localhost:3000
+**Symptoms**: Cannot connect to `http://<workspace-name>.coder:3000`
 
 **Diagnosis**:
 ```bash
@@ -594,7 +594,7 @@ Now that your foundation is solid, you can proceed to any of the specialized mod
 ```bash
 # Grafana Dashboard
 kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
-# Then visit: http://localhost:3000 (admin/admin123)
+# Then visit: http://<workspace-name>.coder:3000 (admin/admin123)
 
 # Check all services
 kubectl get services --all-namespaces
