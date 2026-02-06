@@ -196,7 +196,7 @@ kubectl get pods -n gatekeeper-system
 
 ### Step 3: Deploy Constraint Template
 
-Deploy a simple constraint template (Use the apprpriate relative or absolute paths for the yaml file)
+Deploy a simple constraint template (Use the appropriate relative or absolute paths for the YAML file)
 `kubectl apply -f simple-constraint-template.yaml`
 
 ``` yaml
