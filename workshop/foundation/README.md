@@ -383,7 +383,7 @@ Your foundation setup is complete when:
 
 ## 🚨 Troubleshooting
 
-### Common Issues and Solution`
+### Common Issues and Solutions
 
 #### 1. Pods Stuck in Pending State
 **Symptoms**: Pods show `Pending` status for extended periods

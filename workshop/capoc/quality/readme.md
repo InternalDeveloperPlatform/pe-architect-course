@@ -1,14 +1,14 @@
-# ⚡ Quality Module - Code Quality Enforcement
+# ⚡ Quality Module - Code Coverage Enforcement
 
-Welcome to the Quality Module! This hands-on exercise teaches you to implement automated operational quality gates that ensure deployments follow best practices and organizational standards.
+Welcome to the Quality Module! This hands-on exercise teaches you to implement automated code coverage quality gates that prevent undertested code from reaching production.
 
 ## 🎯 Learning Objectives
 
 By completing this module, you will:
-- Implement **operational quality gates** using OPA Gatekeeper policies
-- Enforce **resource limits and requirements** to prevent resource exhaustion
-- Create **naming convention policies** for consistent infrastructure
-- Build **deployment best practice constraints** for operational excellence
+- Implement **code coverage quality gates** using OPA Gatekeeper policies
+- Enforce **minimum coverage thresholds** to prevent low-quality deployments
+- Create **commit-based coverage policies** using constraint templates
+- Build **deployment quality constraints** that validate coverage data
 - Test **policy violations and compliance** scenarios
 
 ## *IMPORTANT* Recommended extra learning
@@ -36,35 +36,33 @@ kubectl get constraints
 
 ## 🏗️ What You'll Build
 
-In this module, you'll create operational quality controls:
+In this module, you'll create code coverage quality controls:
 
-1. **Resource Limits Template** - Ensures all deployments have proper resource constraints
-2. **Naming Convention Template** - Enforces consistent naming patterns
-3. **Quality Constraints** - Apply the templates with specific organizational rules
-4. **Test Scenarios** - Validate policies with compliant and non-compliant deployments
+1. **Code Coverage Template** - Ensures all deployments meet minimum code coverage thresholds
+2. **Coverage Constraint** - Applies the template with coverage data and minimum requirements
+3. **Test Scenarios** - Validate policies with passing and failing coverage deployments
 
 ## 📚 Understanding Quality Gates
 
-### Why Quality Gates Matter
-- **Resource Management**: Prevent deployments from consuming unlimited resources
-- **Operational Consistency**: Ensure all deployments follow the same patterns
-- **Cost Control**: Avoid runaway processes that consume expensive compute resources
-- **Debugging Support**: Consistent naming makes troubleshooting easier
+### Why Code Coverage Gates Matter
+- **Code Quality**: Prevent undertested code from reaching production
+- **Shift Left**: Catch quality issues before deployment, not after incidents
+- **Automated Enforcement**: No manual review needed for coverage compliance
+- **Risk Reduction**: Higher coverage reduces the likelihood of production bugs
 
-### Types of Quality Controls
-- **Resource Constraints**: CPU and memory limits/requests
-- **Naming Conventions**: Consistent labeling and naming patterns
-- **Security Standards**: Non-root users, read-only filesystems
-- **Operational Metadata**: Required labels for monitoring and management
+### How This Quality Gate Works
+- **Commit SHA Tracking**: Deployments must include a `commit-sha` annotation
+- **Coverage Lookup**: The constraint checks coverage data for the commit's SHA
+- **Threshold Enforcement**: Deployments below the minimum coverage percentage are rejected
 
 ## 🚀 Step-by-Step Implementation
 
-### Step 1: Deploy Resource Limits Constraint Template
+### Step 1: Deploy Code Coverage Constraint Template
 
-First, create a template that enforces proper resource management:
+First, create a template that enforces code coverage thresholds:
 
 ```bash
-# Apply the resource limits constraint template
+# Apply the code coverage constraint template
 kubectl apply -f quality-constraint-template.yaml
 ```
 
@@ -73,7 +71,7 @@ kubectl apply -f quality-constraint-template.yaml
 # Check that the template exists
 kubectl get constrainttemplates
 
-# You should see the new resource template listed
+# You should see the new coverage template listed
 # Example output:
 # NAME                    AGE
 # k8srequiredlabels      20m
@@ -86,19 +84,19 @@ kubectl get constrainttemplates
 
 ### Step 2: Apply Quality Constraints
 
-Now apply the constraints that use our templates with specific rules:
+Now apply the constraint that enforces coverage thresholds:
 
 ```bash
-# Apply coverage limits constraint
+# Apply code coverage constraint
 kubectl apply -f quality-constraint.yaml
 ```
 
-**Verify constraints are active**:
+**Verify the constraint is active**:
 ```bash
-# Check that both constraints exist
+# Check that the constraint exists
 kubectl get constraints
 
-# Look for your quality constraints
+# Look for your coverage constraint
 # Example output:
 # NAME                           AGE
 # ns-must-have-gk               25m
@@ -106,8 +104,9 @@ kubectl get constraints
 # enforce-code-coverage-simple  10s
 ```
 
-**Understanding the constraint configurations**:
-- **coverage Limits**: code coverage minimum requirements
+**Understanding the constraint configuration**:
+- **minimumCoverage**: The minimum code coverage percentage required (default: 80%)
+- **coverageData**: A map of commit SHAs to their coverage percentages
 
 ### Step 3: Test with Non-Compliant Deployment
 
@@ -177,14 +176,14 @@ cat deployment-working.yaml
 
 **1. Template and Constraint Status**:
 ```bash
-# Verify both templates exist
-kubectl get constrainttemplates | grep -E "(resource|naming)"
+# Verify the template exists
+kubectl get constrainttemplates | grep codecoverage
 
-# Verify both constraints are enforcing
-kubectl get constraints | grep -E "(resource|naming)"
+# Verify the constraint is enforcing
+kubectl get constraints | grep coverage
 
 # Check constraint status for any issues
-kubectl describe constraint <constraint name>
+kubectl describe constraint enforce-code-coverage-simple
 ```
 
 **2. Policy Enforcement Testing**:
@@ -209,31 +208,29 @@ kubectl delete -f deployment.yaml --ignore-not-found=true
 ### Success Criteria ✅
 
 Your quality gates are working correctly when:
-- [ ] Quality constraints are enforcing policies
-- [ ] Compliant deployments **succeed** and run properly
-- [ ] Error messages clearly explain policy violations
-- [ ] You understand how to adjust quality standards
+- [ ] Code coverage constraint is enforcing the minimum threshold
+- [ ] Deployments with sufficient coverage **succeed** and run properly
+- [ ] Deployments with low coverage are **rejected** with clear error messages
+- [ ] You understand how to adjust coverage thresholds and coverage data
 
 ## 🚨 Troubleshooting
 
 ### Common Issues and Solutions
 
-**Issue: All deployments blocked by resource policies**
+**Issue: All deployments blocked by coverage policy**
 ```bash
-# Check if resource requirements are too strict
-kubectl get constraint <name> -o yaml
+# Check if the minimum coverage is too strict
+kubectl get constraint enforce-code-coverage-simple -o yaml
 
 # Look at the parameters section
-# Consider lowering minimum requirements or raising maximum limits
+# Consider lowering minimumCoverage or adding coverage data for your commit SHA
 ```
 
-**Issue: Valid names rejected by naming policy**
+**Issue: Missing commit-sha annotation**
 ```bash
-# Check naming pattern requirements
-kubectl describe constraint <name>
-
-# Verify your deployment names match the required pattern
-# Common issue: underscores not allowed, only hyphens
+# Ensure your deployment has the commit-sha annotation
+# The constraint requires: metadata.annotations.commit-sha
+# And the SHA must exist in the coverageData map
 ```
 
 **Issue: Constraint not enforcing**
@@ -247,8 +244,8 @@ kubectl describe constraint <constraint-name>
 
 **Issue: Policies too permissive**
 ```bash
-# Test with obviously bad deployments
-# If they pass, check constraint parameters
+# Test with a deployment missing the commit-sha annotation
+# If it passes, check that the constraint is active
 kubectl apply -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
@@ -267,7 +264,7 @@ spec:
       - name: app
         image: nginx
 EOF
-# This should fail if policies are working
+# This should fail with "Missing required annotation: commit-sha"
 ```
 
 ### Getting Help
@@ -315,8 +312,8 @@ You've successfully implemented comprehensive quality gates for your engineering
 Your platform now ensures operational excellence automatically!
 
 ### What You've Achieved
-- **Improved Quality**: Improved quality reduces outags
-- **Cost Control**: Resource constraints prevent waste
+- **Code Quality**: Coverage enforcement prevents undertested code from deploying
+- **Automated Gates**: No manual review needed for coverage compliance
 - **Developer Guidance**: Clear quality standards and feedback
 
 Continue your engineering platform journey with the [SecOps module](../../secops/README.md) for runtime security monitoring! 🚀
