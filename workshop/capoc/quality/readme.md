@@ -140,7 +140,7 @@ kubectl apply -f deployment-working.yaml
 
 **Expected Result**:
 ```
-deployment.apps/frontend-service created
+deployment.apps/my-app created
 ```
 
 **Verify the deployment**:
