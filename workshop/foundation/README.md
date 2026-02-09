@@ -194,9 +194,9 @@ kubectl get pods -n gatekeeper-system
 # gatekeeper-controller-manager-xxx                1/1     Running   0          1m
 ```
 
-### Verify gatekeeper install worked.
+### Step 3: Deploy Constraint Template
 
-Deploy a simple constraint template (Use the apprpriate relative or absolute paths for the yaml file)
+Deploy a simple constraint template (Use the appropriate relative or absolute paths for the YAML file)
 `kubectl apply -f simple-constraint-template.yaml`
 
 ``` yaml
@@ -232,6 +232,8 @@ spec:
         }
 ```
 
+### Step 4: Deploy Constraint
+
 `kubectl apply -f simple-constraint.yaml`
 
 ``` yaml
@@ -257,9 +259,6 @@ kubectl create namespace test-namespace
 # Create a namespace with the required label (should succeed)
 kubectl apply -f simple-ns-with-label.yaml
 ```
-
-
-
 ---
 
 ## Installing Metrics Server
