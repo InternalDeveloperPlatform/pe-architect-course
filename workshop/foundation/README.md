@@ -6,7 +6,8 @@ This guide will walk you through setting up a complete Kubernetes development en
 
 1. [Installing Grafana Stack](#installing-grafana-stack)
 2. [Installing Gatekeeper](#installing-gatekeeper)
-3. [Verification Steps](#verification-steps)
+3. [Installing Metrics Server](#installing-metrics-server)
+4. [Verification Steps](#verification-steps)
 
 ---
 
@@ -191,12 +192,11 @@ kubectl get pods -n gatekeeper-system
 # NAME                                             READY   STATUS    RESTARTS   AGE
 # gatekeeper-audit-xxx                             1/1     Running   0          1m
 # gatekeeper-controller-manager-xxx                1/1     Running   0          1m
-# gatekeeper-policy-manager-xxx                    1/1     Running   0          1m
 ```
 
-### Verify gatekeeper install worked.
+### Step 3: Deploy Constraint Template
 
-Deploy a simple constraint template (Use the apprpriate relative or absolute paths for the yaml file)
+Deploy a simple constraint template (Use the appropriate relative or absolute paths for the YAML file)
 `kubectl apply -f simple-constraint-template.yaml`
 
 ``` yaml
@@ -232,6 +232,8 @@ spec:
         }
 ```
 
+### Step 4: Deploy Constraint
+
 `kubectl apply -f simple-constraint.yaml`
 
 ``` yaml
@@ -257,8 +259,37 @@ kubectl create namespace test-namespace
 # Create a namespace with the required label (should succeed)
 kubectl apply -f simple-ns-with-label.yaml
 ```
+---
 
+## Installing Metrics Server
 
+Metrics Server provides resource usage metrics for `kubectl top` commands.
+
+### Step 1: Install Metrics Server
+
+```bash
+# Add Helm repository
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+helm repo update
+
+# Install (--kubelet-insecure-tls required for development/lab environments)
+helm upgrade --install metrics-server metrics-server/metrics-server \
+  --namespace kube-system \
+  --set args={--kubelet-insecure-tls}
+
+# Wait for ready
+kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=metrics-server -n kube-system --timeout=90s
+```
+
+### Step 2: Verify Installation
+
+```bash
+# Check pod status
+kubectl get pods -n kube-system -l app.kubernetes.io/name=metrics-server
+
+# Test metrics (may take 30-60 seconds)
+kubectl top nodes
+```
 
 ---
 
@@ -298,7 +329,6 @@ kubectl get pods -n gatekeeper-system
 # Expected output (all should be Running):
 # gatekeeper-audit-xxx                 1/1     Running   0          2m
 # gatekeeper-controller-manager-xxx    1/1     Running   0          2m
-# gatekeeper-policy-manager-xxx        1/1     Running   0          2m
 
 # Verify constraint template is working
 kubectl get constrainttemplates
@@ -373,6 +403,8 @@ Your foundation setup is complete when:
 - [ ] All monitoring pods are in "Running" state
 - [ ] All gatekeeper pods are in "Running" state
 - [ ] Grafana dashboard is accessible at `http://<workspace-name>.coder:3000`
+- [ ] Metrics Server pod is in "Running" state
+- [ ] `kubectl top nodes` returns resource metrics
 - [ ] You can login to Grafana with admin/admin123
 - [ ] Constraint template `k8srequiredlabels` exists
 - [ ] Constraint `ns-must-have-gk` is active
@@ -488,7 +520,26 @@ helm uninstall grafana-stack -n monitoring
 # Then reinstall with the values file (lower resource limits)
 ```
 
-#### 5. Helm Installation Fails
+#### 5. kubectl top Returns "Metrics not available"
+**Symptoms**: `kubectl top nodes` returns error about metrics API
+
+**Diagnosis**:
+```bash
+kubectl get pods -n kube-system -l app.kubernetes.io/name=metrics-server
+kubectl logs -n kube-system deployment/metrics-server
+```
+
+**Solutions**:
+```bash
+helm upgrade --install metrics-server metrics-server/metrics-server \
+  --namespace kube-system \
+  --set args={--kubelet-insecure-tls}
+
+# Wait 60 seconds for metrics availability
+sleep 60 && kubectl top nodes
+```
+
+#### 6. Helm Installation Fails
 **Symptoms**: `helm install` command fails
 
 **Common Solutions**:
@@ -551,6 +602,9 @@ To remove the entire setup:
 helm uninstall grafana-stack -n monitoring
 kubectl delete namespace monitoring
 
+# Uninstall Metrics Server
+helm uninstall metrics-server -n kube-system
+
 # Uninstall Gatekeeper
 kubectl delete -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.14/deploy/gatekeeper.yaml
 ```
@@ -564,6 +618,7 @@ Congratulations! You have successfully set up your engineering platform foundati
 ✅ **Kubernetes cluster** ready for development
 ✅ **Grafana monitoring stack** with dashboards and metrics
 ✅ **OPA Gatekeeper** enforcing policy-as-code
+✅ **Metrics Server** providing resource usage data
 ✅ **Health checks** and verification steps completed
 
 ## 🎯 Next Steps
@@ -609,4 +664,3 @@ kubectl get pods --all-namespaces
 - `simple-constraint.yaml` - Namespace policy
 
 Ready to continue your engineering platform journey? Choose your next module above! 🚀
-
