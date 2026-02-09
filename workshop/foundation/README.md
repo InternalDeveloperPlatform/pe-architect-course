@@ -138,6 +138,24 @@ Or, just construct the url as follows:
 
 So if your workspace name is student123 your url is http://student123.coder:3000/
 
+**on Mac OSX**
+1. Activate coder connect
+
+![coder-connect](img/coder-connect.png)
+
+2. Add the VPN connection when asked
+3. This is the url name when clicking on the coder desktop app icon
+
+![coder-url](img/coder-url.png)
+
+4. You might to create a token. Copy the given url and create token to insert in the dialog.
+5. Use copy button (`supersandbox` in the example case)
+
+![coder-workspace-name](img/coder-workspace-name.png)
+
+6. Setup the grafana port forward mentioned above.
+6. Then with the VPN tunnel active you'd be able to access `http://<workspace-name>.coder:3000/grafana` (in the example case `http://supersandbox.coder:3000/grafana`)
+
 **Getting Admin Credentials**
 ```bash
 # Default credentials from our setup:
