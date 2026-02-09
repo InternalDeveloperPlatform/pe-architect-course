@@ -192,7 +192,6 @@ kubectl get pods -n gatekeeper-system
 # NAME                                             READY   STATUS    RESTARTS   AGE
 # gatekeeper-audit-xxx                             1/1     Running   0          1m
 # gatekeeper-controller-manager-xxx                1/1     Running   0          1m
-# gatekeeper-policy-manager-xxx                    1/1     Running   0          1m
 ```
 
 ### Verify gatekeeper install worked.
@@ -331,7 +330,6 @@ kubectl get pods -n gatekeeper-system
 # Expected output (all should be Running):
 # gatekeeper-audit-xxx                 1/1     Running   0          2m
 # gatekeeper-controller-manager-xxx    1/1     Running   0          2m
-# gatekeeper-policy-manager-xxx        1/1     Running   0          2m
 
 # Verify constraint template is working
 kubectl get constrainttemplates
