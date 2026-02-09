@@ -145,7 +145,7 @@ So if your workspace name is student123 your url is http://student123.coder:3000
 # Password: admin123
 
 # Get the admin password (if you didn't set a custom one)
-kubectl get secret -n monitoring grafana-stack-grafana \
+kubectl get secret -n monitoring grafana-stack \
   -o jsonpath="{.data.admin-password}" | base64 --decode && echo
 ```
 
@@ -473,22 +473,22 @@ kubectl apply -f simple-constraint.yaml
 kubectl get pods -n monitoring | grep grafana
 
 # Check service exists
-kubectl get service -n monitoring grafana-stack-grafana
+kubectl get service -n monitoring grafana-stack
 
 # Check logs for errors
-kubectl logs -n monitoring deployment/grafana-stack-grafana
+kubectl logs -n monitoring deployment/grafana-stack
 ```
 
 **Solutions**:
 ```bash
 # Restart port-forward
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+kubectl port-forward -n monitoring service/grafana-stack 3000:80
 
 # Or try different port if 3000 is busy
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3001:80
+kubectl port-forward -n monitoring service/grafana-stack 3001:80
 
 # Check if password is correct
-kubectl get secret -n monitoring grafana-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode && echo
+kubectl get secret -n monitoring grafana-stack -o jsonpath="{.data.admin-password}" | base64 --decode && echo
 ```
 
 #### 4. High Resource Usage / Cluster Overloaded
