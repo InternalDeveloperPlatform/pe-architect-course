@@ -43,12 +43,12 @@ This module contains two hands-on sub-modules:
 
 ---
 
-### 2. ⚡ Quality Module - Code Quality Enforcement
+### 2. ⚡ Quality Module - Code Coverage Enforcement
 
 **What You'll Build**:
-- Resource limit enforcement policies
-- Naming convention constraints
-- Deployment best practice gates
+- Code coverage constraint templates
+- Minimum coverage threshold policies
+- Commit-based quality gates
 
 **Path**: [`./quality/readme.md`](./quality/readme.md)
 
@@ -63,7 +63,7 @@ This module contains two hands-on sub-modules:
 
 2. **Then Quality Module**: Continue with [`./quality/readme.md`](./quality/readme.md)
    - Reinforces policy concepts
-   - Adds operational best practices
+   - Adds code coverage quality gates
    - Completes the compliance picture
 
 ### Alternative: Choose Your Focus
@@ -95,10 +95,10 @@ After completing both sub-modules, you should have:
 - [ ] Understanding of vulnerability thresholds and exceptions
 
 ### Quality Module ✅
-- [ ] Quality constraint template deployed
-- [ ] Quality constraints enforcing best practices
-- [ ] Successfully tested with compliant and non-compliant deployments
-- [ ] Understanding of operational policy enforcement
+- [ ] Code coverage constraint template deployed
+- [ ] Coverage constraint active and blocking low-coverage commits
+- [ ] Successfully tested with passing and failing coverage scenarios
+- [ ] Understanding of code coverage policy enforcement
 
 ## 🔗 Navigation
 
