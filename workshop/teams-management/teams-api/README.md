@@ -71,7 +71,7 @@ kubectl apply -f deployment.yaml
 ```
 
 **Container Images Available**:
-- **Docker Hub**: `olivercodes01/teams-api:latest`
+- **Docker Hub**: `olivercodes01/teams-api:0.0.2`
 - **Registry**: https://hub.docker.com/u/olivercodes01
 
 ### Option 2: Local Development Setup
