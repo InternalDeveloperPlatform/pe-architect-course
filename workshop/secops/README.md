@@ -73,8 +73,7 @@ helm install falco falcosecurity/falco \
   --namespace falco-system \
   --create-namespace \
   --set driver.kind=modern_ebpf \
-  --set falco.grpc.enabled=true \
-  --set falco.grpcOutput.enabled=true
+  --set falcosidekick.enabled=true
 ```
 
 **Verify Falco Installation**:
@@ -127,8 +126,7 @@ Now let's add custom security rules for detecting specific threats:
 helm upgrade falco falcosecurity/falco \
   --namespace falco-system \
   --set driver.kind=modern_ebpf \
-  --set falco.grpc.enabled=true \
-  --set falco.grpcOutput.enabled=true \
+  --set falcosidekick.enabled=true \
   --set-file customRules."custom_rules\.yaml"=./root-detect-rule.yaml
 ```
 
@@ -153,13 +151,13 @@ Create a security constraint template that works with Falco:
 
 ```bash
 # Apply security constraint template
-kubectl apply -f security-constraint-template.yaml
+kubectl apply -f constraint-template.yaml
 ```
 
 **Verify the template**:
 ```bash
 # Check that security template is created
-kubectl get constrainttemplates | grep -i security
+kubectl get constrainttemplates | grep -i falco
 
 # Should show the new security template
 ```
@@ -176,16 +174,16 @@ Apply the constraint that uses our security template:
 
 ```bash
 # Apply security constraint
-kubectl apply -f security-constraint.yaml
+kubectl apply -f constraint.yaml
 ```
 
 **Verify constraint is enforcing**:
 ```bash
 # Check that constraint exists and is active
-kubectl get constraints | grep -i security
+kubectl get constraints | grep -i falco
 
 # Check constraint status
-kubectl describe constraint <security-constraint-name>
+kubectl describe constraint
 ```
 
 ### Step 6: Test Security Detection and Prevention
@@ -211,7 +209,7 @@ kubectl logs -n falco-system daemonset/falco | tail -20
 **Test 2: Admission Prevention (Gatekeeper)**
 ```bash
 # This should FAIL - blocked by security constraint
-kubectl apply -f deployment-insecure.yaml
+kubectl apply -f deployment.yaml
 
 # Expected error about security policy violations
 ```
@@ -219,10 +217,10 @@ kubectl apply -f deployment-insecure.yaml
 **Test 3: Compliant Deployment**
 ```bash
 # This should SUCCEED - meets security requirements
-kubectl apply -f deployment-secure.yaml
+kubectl apply -f deployment-works.yaml
 
 # Verify deployment
-kubectl get deployment secure-app
+kubectl get deployment secure-nonroot-app
 ```
 
 ## ✅ Verification Steps
@@ -245,13 +243,13 @@ kubectl logs -n falco-system daemonset/falco | grep "custom_rules"
 **2. Security Constraints**:
 ```bash
 # Verify security constraint template exists
-kubectl get constrainttemplates | grep -i security
+kubectl get constrainttemplates | grep -i falco
 
 # Verify security constraint is enforcing
-kubectl get constraints | grep -i security
+kubectl get constraints | grep -i falco
 
 # Test constraint enforcement
-kubectl apply -f deployment-insecure.yaml
+kubectl apply -f deployment.yaml
 # Should be blocked with security violations
 ```
 
@@ -263,13 +261,13 @@ kubectl run security-test --image=busybox --rm -it -- sh
 # Check logs: kubectl logs -n falco-system daemonset/falco | tail -5
 
 # Test admission prevention
-kubectl apply -f deployment-insecure.yaml
+kubectl apply -f deployment.yaml
 # Should fail with security policy errors
 
 # Test compliant deployment
-kubectl apply -f deployment-secure.yaml
+kubectl apply -f deployment-works.yaml
 # Should succeed
-kubectl get deployment secure-app
+kubectl get deployment secure-nonroot-app
 ```
 
 ### Success Criteria ✅
