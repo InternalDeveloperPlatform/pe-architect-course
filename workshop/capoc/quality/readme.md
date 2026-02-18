@@ -151,7 +151,7 @@ kubectl get pods -l app=my-app
 kubectl get deployment my-app -o yaml
 ```
 
-### Step 6: Examine Quality Differences
+### Step 5: Examine Quality Differences
 
 Compare the deployments to understand quality standards:
 
