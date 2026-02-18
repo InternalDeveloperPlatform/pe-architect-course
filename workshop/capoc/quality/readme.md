@@ -167,9 +167,9 @@ cat deployment-working.yaml
 ```
 
 **Key differences you'll notice**:
-- `deployment.yaml` uses commit SHA `b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0a1`, which maps to **72%** in the constraint's `coverageData` — below the 80% minimum → **rejected**
-- `deployment-working.yaml` uses commit SHA `a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0`, which maps to **85%** → **allowed**
-- The policy performs a **static lookup** in the constraint's `coverageData` map — it is not a live image scan
+- `deployment.yaml` uses the `commit-sha` annotation value `b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0a1`, which maps to **72%** in the constraint's `coverageData` — below the 80% minimum → **rejected**
+- `deployment-working.yaml` uses the `commit-sha` annotation value `a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0`, which maps to **85%** → **allowed**
+- The policy performs a **static lookup** of these commit identifiers in the constraint's `coverageData` map — it is not a live image scan
 
 ## ✅ Verification Steps
 
