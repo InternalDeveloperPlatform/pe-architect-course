@@ -196,7 +196,7 @@ kubectl apply -f deployment-working.yaml
 kubectl get deployment my-app
 ```
 
-**4. Clean Up Test Resources**:
+**3. Clean Up Test Resources**:
 ```bash
 # Remove successful deployment
 kubectl delete -f deployment-working.yaml
