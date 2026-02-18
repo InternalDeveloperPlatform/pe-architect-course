@@ -119,8 +119,7 @@ kubectl apply -f deployment.yaml
 
 **Expected Result**:
 ```
-Error from server (admission webhook denied):
-Deployment violates quality standards
+Error from server (Forbidden): error when creating "deployment.yaml": admission webhook "validation.gatekeeper.sh" denied the request: [enforce-code-coverage-simple] Code coverage 72% is below required minimum of 80% for commit b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0a1
 ```
 
 **Understanding the failure**:
