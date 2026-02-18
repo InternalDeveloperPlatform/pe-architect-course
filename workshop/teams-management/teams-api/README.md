@@ -67,7 +67,7 @@ The easiest way to get started uses the pre-built container images:
 kubectl create namespace teams-api
 
 # Deploy the Teams API using pre-built images
-kubectl apply -f k8s/
+kubectl apply -f deployment.yaml
 ```
 
 **Container Images Available**:
@@ -86,7 +86,7 @@ cd teams-management/teams-api
 docker build -t teams-api:local .
 
 # Deploy with local image
-kubectl apply -f k8s/
+kubectl apply -f deployment.yaml
 # (Modify deployment to use teams-api:local)
 ```
 
@@ -128,12 +128,13 @@ kubectl port-forward -n teams-api svc/teams-api-service 8080:4200
 curl http://<workspace-name>.coder:3002/health
 
 # Expected response:
-# {"status": "healthy", "message": "Teams API is running", "teams_count": 0}
+# {"status": "healthy", "teams_count": 0}
 ```
 
 ### Production Access
 
 For production deployments, consider:
+
 - **Ingress Controller**: Expose via ingress for external access
 - **Load Balancer**: Use LoadBalancer service type
 - **Service Mesh**: Integrate with Istio or similar
@@ -183,9 +184,7 @@ curl http://localhost:8080/health
 # Expected response:
 {
   "status": "healthy",
-  "message": "Teams API is running",
-  "teams_count": 0,
-  "version": "1.0.0"
+  "teams_count": 0
 }
 ```
 
@@ -284,6 +283,13 @@ curl -X POST http://localhost:8080/teams -H "Content-Type: application/json" -d 
 # Response includes:
 # HTTP/1.1 422 Unprocessable Entity
 # {"detail": [{"loc": ["body", "name"], "msg": "field required"}]}
+
+# Try to create a team with a duplicate name
+curl -X POST http://localhost:8080/teams -H "Content-Type: application/json" -d '{"name": "Backend Team"}'
+
+# Response includes:
+# HTTP/1.1 400 Bad Request
+# {"detail": "Team name already exists"}
 ```
 
 ## 🔧 Configuration Options
@@ -369,10 +375,10 @@ lsof -i :8080
 **Solutions**:
 ```bash
 # Restart port forwarding
-kubectl port-forward -n teams-api svc/teams-api-service 8080:80
+kubectl port-forward -n teams-api svc/teams-api-service 8080:4200
 
 # Try different local port if 8080 is busy
-kubectl port-forward -n teams-api svc/teams-api-service 8081:80
+kubectl port-forward -n teams-api svc/teams-api-service 8081:4200
 
 # Check firewall or network restrictions
 ```
