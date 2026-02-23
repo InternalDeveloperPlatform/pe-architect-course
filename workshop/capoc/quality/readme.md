@@ -119,8 +119,7 @@ kubectl apply -f deployment.yaml
 
 **Expected Result**:
 ```
-Error from server (admission webhook denied):
-Deployment violates quality standards
+Error from server (Forbidden): error when creating "deployment.yaml": admission webhook "validation.gatekeeper.sh" denied the request: [enforce-code-coverage-simple] Code coverage 72% is below required minimum of 80% for commit b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0a1
 ```
 
 **Understanding the failure**:
@@ -151,7 +150,7 @@ kubectl get pods -l app=my-app
 kubectl get deployment my-app -o yaml
 ```
 
-### Step 6: Examine Quality Differences
+### Step 5: Examine Quality Differences
 
 Compare the deployments to understand quality standards:
 
@@ -168,7 +167,9 @@ cat deployment-working.yaml
 ```
 
 **Key differences you'll notice**:
-- **Inspect the Sha**: the sha for the working image has met the quality requirement
+- `deployment.yaml` uses the `commit-sha` annotation value `b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0a1`, which maps to **72%** in the constraint's `coverageData` — below the 80% minimum → **rejected**
+- `deployment-working.yaml` uses the `commit-sha` annotation value `a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0`, which maps to **85%** → **allowed**
+- The policy performs a **static lookup** of these commit identifiers in the constraint's `coverageData` map — it is not a live image scan
 
 ## ✅ Verification Steps
 
@@ -196,7 +197,7 @@ kubectl apply -f deployment-working.yaml
 kubectl get deployment my-app
 ```
 
-**4. Clean Up Test Resources**:
+**3. Clean Up Test Resources**:
 ```bash
 # Remove successful deployment
 kubectl delete -f deployment-working.yaml
