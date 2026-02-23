@@ -71,7 +71,7 @@ kubectl apply -f deployment.yaml
 ```
 
 **Container Images Available**:
-- **Docker Hub**: `olivercodes01/teams-api:latest`
+- **Docker Hub**: `olivercodes01/teams-api:0.0.2`
 - **Registry**: https://hub.docker.com/u/olivercodes01
 
 ### Option 2: Local Development Setup
@@ -105,7 +105,7 @@ kubectl get svc -n teams-api
 
 # Expected output:
 # NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
-# teams-api-service  ClusterIP   10.96.xxx.xxx  <none>        80/TCP    2m
+# teams-api-service  ClusterIP   10.96.xxx.xxx  <none>        4200/TCP    2m
 ```
 
 ## 🌐 Accessing the API
@@ -116,7 +116,7 @@ For local development and testing:
 
 ```bash
 # Port forward the service to your local machine
-kubectl port-forward -n teams-api svc/teams-api-service 8080:4200
+kubectl port-forward -n teams-api svc/teams-api-service 3002:4200
 
 # Keep this terminal open and use a new terminal for API calls
 # The API will be available at: http://<workspace-name>.coder:3002
@@ -147,10 +147,10 @@ Once the API is running, access the interactive documentation:
 
 ```bash
 # With port forwarding active, open in browser:
-# http://localhost:8080/docs
+# http://<workspace-name>.coder:3002/docs
 
 # Or access the ReDoc version:
-# http://localhost:8080/redoc
+# http://<workspace-name>.coder:3002/redoc
 ```
 
 ### Observability
@@ -158,19 +158,19 @@ Once the API is running, access the interactive documentation:
 Go to your Grafana instance ( http://<workspace-name>.coder:3000/grafana )
 
 Navigate to: Kubernetes / Compute Resources / Namespace (Workloads)
-Select "Engineering Platform" in the Namspace dropdown.
+Select "teams-api" in the Namespace dropdown.
 
-Here you will see our engineering platform deployed pods and workloads.
+Here you will see our teams API deployed pods and workloads.
 
 ### API Endpoints
 
 | Method | Endpoint | Description | Example |
 |--------|----------|-------------|---------|
-| GET | `/health` | Health check | `curl localhost:8080/health` |
-| GET | `/teams` | List all teams | `curl localhost:8080/teams` |
+| GET | `/health` | Health check | `curl <workspace-name>.coder:3002/health` |
+| GET | `/teams` | List all teams | `curl <workspace-name>.coder:3002/teams` |
 | POST | `/teams` | Create new team | `curl -X POST ... (see below)` |
-| GET | `/teams/{id}` | Get specific team | `curl localhost:8080/teams/{id}` |
-| DELETE | `/teams/{id}` | Delete team | `curl -X DELETE localhost:8080/teams/{id}` |
+| GET | `/teams/{id}` | Get specific team | `curl <workspace-name>.coder:3002/teams/{id}` |
+| DELETE | `/teams/{id}` | Delete team | `curl -X DELETE <workspace-name>.coder:3002/teams/{id}` |
 
 ## 🧪 API Usage Examples
 
@@ -179,7 +179,7 @@ Here you will see our engineering platform deployed pods and workloads.
 Always start by verifying the API is healthy:
 
 ```bash
-curl http://localhost:8080/health
+curl http://<workspace-name>.coder:3002/health
 
 # Expected response:
 {
@@ -193,7 +193,7 @@ curl http://localhost:8080/health
 Create a new engineering team:
 
 ```bash
-curl -X POST "http://localhost:8080/teams" \
+curl -X POST "http://<workspace-name>.coder:3002/teams" \
      -H "Content-Type: application/json" \
      -d '{"name": "Backend Team"}'
 
@@ -208,10 +208,10 @@ curl -X POST "http://localhost:8080/teams" \
 **Creating multiple teams**:
 ```bash
 # Create several teams for your organization
-curl -X POST "http://localhost:8080/teams" -H "Content-Type: application/json" -d '{"name": "Frontend Team"}'
-curl -X POST "http://localhost:8080/teams" -H "Content-Type: application/json" -d '{"name": "DevOps Team"}'
-curl -X POST "http://localhost:8080/teams" -H "Content-Type: application/json" -d '{"name": "QA Team"}'
-curl -X POST "http://localhost:8080/teams" -H "Content-Type: application/json" -d '{"name": "Data Team"}'
+curl -X POST "http://<workspace-name>.coder:3002/teams" -H "Content-Type: application/json" -d '{"name": "Frontend Team"}'
+curl -X POST "http://<workspace-name>.coder:3002/teams" -H "Content-Type: application/json" -d '{"name": "DevOps Team"}'
+curl -X POST "http://<workspace-name>.coder:3002/teams" -H "Content-Type: application/json" -d '{"name": "QA Team"}'
+curl -X POST "http://<workspace-name>.coder:3002/teams" -H "Content-Type: application/json" -d '{"name": "Data Team"}'
 ```
 
 ### Listing Teams
@@ -219,7 +219,7 @@ curl -X POST "http://localhost:8080/teams" -H "Content-Type: application/json" -
 Retrieve all teams:
 
 ```bash
-curl http://localhost:8080/teams
+curl http://<workspace-name>.coder:3002/teams
 
 # Expected response:
 [
@@ -242,7 +242,7 @@ Retrieve details for a specific team:
 
 ```bash
 # Replace with actual team ID from the list response
-curl http://localhost:8080/teams/fc9402c5-2b26-41b2-8b97-ccdefdc65fe7
+curl http://<workspace-name>.coder:3002/teams/fc9402c5-2b26-41b2-8b97-ccdefdc65fe7
 
 # Expected response:
 {
@@ -257,7 +257,7 @@ curl http://localhost:8080/teams/fc9402c5-2b26-41b2-8b97-ccdefdc65fe7
 Remove a team that's no longer needed:
 
 ```bash
-curl -X DELETE http://localhost:8080/teams/fc9402c5-2b26-41b2-8b97-ccdefdc65fe7
+curl -X DELETE http://<workspace-name>.coder:3002/teams/fc9402c5-2b26-41b2-8b97-ccdefdc65fe7
 
 # Expected response:
 {
@@ -271,14 +271,14 @@ The API returns appropriate HTTP status codes:
 
 ```bash
 # Try to get a non-existent team
-curl -i http://localhost:8080/teams/invalid-id
+curl -i http://<workspace-name>.coder:3002/teams/invalid-id
 
 # Response includes:
 # HTTP/1.1 404 Not Found
 # {"detail": "Team not found"}
 
 # Try to create team with invalid data
-curl -X POST http://localhost:8080/teams -H "Content-Type: application/json" -d '{}'
+curl -X POST http://<workspace-name>.coder:3002/teams -H "Content-Type: application/json" -d '{}'
 
 # Response includes:
 # HTTP/1.1 422 Unprocessable Entity
@@ -369,7 +369,7 @@ kubectl get svc -n teams-api
 kubectl get endpoints -n teams-api
 
 # Check if port forwarding is active
-lsof -i :8080
+lsof -i :3002
 ```
 
 **Solutions**:
@@ -393,7 +393,7 @@ kubectl port-forward -n teams-api svc/teams-api-service 8081:4200
 kubectl logs -f -n teams-api deployment/teams-api
 
 # Check API health endpoint
-curl -v http://localhost:8080/health
+curl -v http://<workspace-name>.coder:3002/health
 ```
 
 **Solutions**:
@@ -415,7 +415,7 @@ kubectl describe deployment/teams-api -n teams-api
 kubectl top pods -n teams-api
 
 # Test API response time
-time curl http://localhost:8080/health
+time curl http://<workspace-name>.coder:3002/health
 ```
 
 **Solutions**:
@@ -433,7 +433,7 @@ Set up monitoring to catch issues early:
 cat > monitor-api.sh << 'EOF'
 #!/bin/bash
 while true; do
-    if ! curl -f -s http://localhost:8080/health > /dev/null; then
+    if ! curl -f -s http://<workspace-name>.coder:3002/health > /dev/null; then
         echo "$(date): API health check failed"
         # Add alerting logic here
     fi
@@ -452,13 +452,13 @@ Complete test sequence to verify everything works:
 
 ```bash
 # 1. Health check
-curl http://localhost:8080/health
+curl http://<workspace-name>.coder:3002/health
 
 # 2. List teams (should be empty initially)
-curl http://localhost:8080/teams
+curl http://<workspace-name>.coder:3002/teams
 
 # 3. Create a team
-team_response=$(curl -s -X POST "http://localhost:8080/teams" -H "Content-Type: application/json" -d '{"name": "Test Team"}')
+team_response=$(curl -s -X POST "http://<workspace-name>.coder:3002/teams" -H "Content-Type: application/json" -d '{"name": "Test Team"}')
 echo $team_response
 
 # 4. Extract team ID for next steps
@@ -466,16 +466,16 @@ team_id=$(echo $team_response | jq -r '.id')
 echo "Created team with ID: $team_id"
 
 # 5. List teams again (should show the created team)
-curl http://localhost:8080/teams
+curl http://<workspace-name>.coder:3002/teams
 
 # 6. Get specific team
-curl http://localhost:8080/teams/$team_id
+curl http://<workspace-name>.coder:3002/teams/$team_id
 
 # 7. Delete the team
-curl -X DELETE http://localhost:8080/teams/$team_id
+curl -X DELETE http://<workspace-name>.coder:3002/teams/$team_id
 
 # 8. Verify deletion (should be empty again)
-curl http://localhost:8080/teams
+curl http://<workspace-name>.coder:3002/teams
 ```
 
 ### Automated Testing
@@ -487,7 +487,7 @@ cat > test-api.sh << 'EOF'
 #!/bin/bash
 set -e
 
-BASE_URL="http://localhost:8080"
+BASE_URL="http://<workspace-name>.coder:3002"
 echo "Testing Teams API at $BASE_URL"
 
 # Test health endpoint
@@ -555,7 +555,7 @@ The current API uses in-memory storage, which means:
 
 Your Teams API setup is complete when:
 - [ ] API pods are running in the teams-api namespace
-- [ ] Port forwarding works and you can access localhost:8080
+- [ ] Port forwarding works and you can access <workspace-name>.coder:8080
 - [ ] Health check returns 200 OK status
 - [ ] You can create, list, and delete teams via curl
 - [ ] Interactive API docs are accessible at /docs

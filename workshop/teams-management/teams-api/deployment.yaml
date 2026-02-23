@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: teams-api
+  namespace: teams-api
   labels:
     app: teams-api
   annotations:
@@ -66,6 +67,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: teams-api-service
+  namespace: teams-api
 spec:
   selector:
     app: teams-api
@@ -79,6 +81,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: teams-api-ingress
+  namespace: teams-api
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
     traefik.ingress.kubernetes.io/headers.accesscontrolallowmethods: GET,POST,PUT,DELETE,OPTIONS
