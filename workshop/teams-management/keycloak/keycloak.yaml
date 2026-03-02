@@ -209,17 +209,19 @@
 #           "redirectUris": [
 #             "http://platform-auth.127.0.0.1.sslip.io/*",
 #             "http://engineering-platform.local/*",
-#             "http://localhost:4200/*"
+#             "http://localhost:4200/*",
+#             "http://<workspace-name>.coder/*"
 #           ],
 #           "webOrigins": [
 #             "http://platform-auth.127.0.0.1.sslip.io",
 #             "http://engineering-platform.local",
-#             "http://localhost:4200"
+#             "http://localhost:4200",
+#             "http://<workspace-name>.coder:<port>"
 #           ],
 #           "publicClient": true,
 #           "protocol": "openid-connect",
 #           "attributes": {
-#             "post.logout.redirect.uris": "http://platform-auth.127.0.0.1.sslip.io/*##http://localhost:4200/*"
+#             "post.logout.redirect.uris": "http://platform-auth.127.0.0.1.sslip.io/*##http://localhost:4200/*##http://<workspace-name>.coder:*"
 #           }
 #         }
 #       ],

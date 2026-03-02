@@ -47,6 +47,10 @@ A modern Angular web application for managing engineering teams, designed to int
 git clone <repository-url>
 cd teams-app
 
+# In coder install node first
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+sudo apt install -y nodejs
+
 # Install dependencies
 npm install
 ```
