@@ -34,6 +34,9 @@ curl -f http://localhost:8080/health || echo "Teams API not accessible"
 ### Step 1: Install Dependencies
 
 ```bash
+# In coder install the deps
+sudo apt install -y python3.12-venv python3-pip
+
 # Install required Python packages
 pip install -r requirements.txt
 
