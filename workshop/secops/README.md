@@ -140,10 +140,10 @@ kubectl logs -n falco-system daemonset/falco | grep -i "rules"
 
 **Understanding the custom rule**:
 The `root-detect-rule.yaml` contains rules for detecting:
-- Root user executions in containers
-- Suspicious file access patterns
-- Network connections from containers
-- Privilege escalation attempts
+- **Container Running as Root**: Alerts when a container's process runs as UID 0
+- **Root Process in User Namespace**: Detects root processes inside user-namespaced containers
+
+These rules provide a focused baseline. You can extend them with additional detections (e.g., suspicious file access, unexpected network connections, privilege escalation) as part of the capstone or as an extension exercise. See the [Customization Options](#-customization-options) section below for examples.
 
 ### Step 4: Add Security Constraint Template
 
@@ -162,11 +162,11 @@ kubectl get constrainttemplates | grep -i falco
 # Should show the new security template
 ```
 
-**What this template does**:
-- Prevents deployment of privileged containers
-- Requires security contexts for all containers
-- Blocks containers running as root
-- Enforces read-only root filesystems
+**What this template enforces**:
+- **Blocks containers running as root**: Rejects pods/deployments where the effective UID is 0 or unspecified (which defaults to root)
+- **Prevents privileged containers**: Rejects containers with `privileged: true` in their security context
+
+The template also supports exemptions for system namespaces (kube-system, gatekeeper-system) and trusted base images (e.g., registry.k8s.io). You can extend this template to enforce additional controls such as `readOnlyRootFilesystem: true` or `allowPrivilegeEscalation: false` as a capstone exercise.
 
 ### Step 5: Apply Security Constraint
 
@@ -187,6 +187,17 @@ kubectl describe constraint
 ```
 
 ### Step 6: Test Security Detection and Prevention
+
+#### Understanding Defense in Depth
+
+This step tests **two independent security layers** that serve different purposes:
+
+- **Gatekeeper (Admission Control)**: Prevents non-compliant workloads from being deployed. It acts as a gate at the Kubernetes API server. If Gatekeeper blocks a pod, it never runs and Falco never sees it.
+- **Falco (Runtime Detection)**: Monitors workloads that are already running. It detects suspicious behavior at runtime, such as a container unexpectedly running as root or executing network tools.
+
+These layers are complementary, not redundant. Gatekeeper catches policy violations at deploy time. Falco catches threats that slip through — for example, a container that was allowed to deploy but then executes suspicious commands, or a workload in an exempt namespace behaving unexpectedly.
+
+In the tests below, Test 1 demonstrates Falco's runtime detection (the pod runs but Falco alerts on its behavior). Test 2 demonstrates Gatekeeper's admission prevention (the pod is blocked before it starts). Test 3 demonstrates a compliant deployment that passes both layers.
 
 **Test 1: Runtime Detection (Falco)**
 ```bash

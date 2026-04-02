@@ -2,11 +2,6 @@
 
 Welcome to the Teams Management module! This comprehensive module teaches you to build a complete engineering platform with APIs, CLI tools, and web interfaces for managing engineering teams. You'll learn to create developer-friendly tools that make platform operations simple and scalable.
 
-## TODO
-
-- add docs on operator install
-- do a runthrough with these updated docs
-
 ## 🎯 Learning Objectives
 
 By completing this module, you will:
@@ -54,7 +49,7 @@ This module implements a complete 3-tier application stack:
 ┌─────────────────────────────────────────────────────────────────┐
 │                       🚀 Teams API                               │
 │                    (FastAPI + Python)                            │
-│                      Port: 8080                                  │
+│              Service: 4200 → Container: 8000                     │
 └─────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
@@ -131,6 +126,131 @@ This module implements a complete 3-tier application stack:
 
 **Path**: [`./teams-app/README.md`](./teams-app/README.md)
 
+---
+
+### 4. ☸️ Teams Operator (`teams-operator/`)
+**Duration**: ~20-30 minutes
+**Technology**: Python, Kubernetes Python Client
+
+The Teams Operator is a custom Kubernetes controller that watches the Teams API and automatically manages Kubernetes namespaces based on team state. When a team is created via the API (or CLI or UI), the operator detects it and provisions a dedicated namespace. When a team is deleted, the operator cleans up the namespace.
+
+**What You'll Build**:
+- A polling-based Kubernetes operator that reconciles team state
+- Automated namespace provisioning with proper labels and annotations
+- RBAC configuration for operator permissions
+- Production-ready container deployment with security hardening
+
+**How It Works**:
+1. The operator polls the Teams API every 30 seconds (configurable via `POLL_INTERVAL`)
+2. It compares the current list of teams against its known state
+3. For new teams, it creates a namespace named `team-<sanitized-team-name>` with metadata labels
+4. For deleted teams, it removes the corresponding namespace
+5. Each namespace is labeled with `app.kubernetes.io/managed-by: teams-operator` and the team ID
+
+#### Step 1: Build the Operator Image
+
+```bash
+cd teams-operator
+
+# Build the Docker image
+docker build -f operator.Dockerfile -t teams-operator:local .
+
+# Load the image into your kind cluster so nodes can pull it
+kind load docker-image teams-operator:local --name 5min-idp
+```
+
+> **Note**: The `kind load` step is required because kind clusters cannot pull from your local Docker daemon directly. Without this step, the pod will fail with an `ErrImagePull` error.
+
+#### Step 2: Update the Deployment Image Reference
+
+Before deploying, update `operator-deployment.yaml` to use your locally built image instead of the remote registry image:
+
+```yaml
+# In operator-deployment.yaml, change the image field:
+image: teams-operator:local
+imagePullPolicy: Never   # Add this line — tells Kubernetes not to try pulling from a remote registry
+```
+
+#### Step 3: Deploy the Operator
+
+The `operator-deployment.yaml` contains all the Kubernetes resources the operator needs: a ServiceAccount, ClusterRole, ClusterRoleBinding, and Deployment.
+
+```bash
+# Apply the operator manifests (creates RBAC, namespace, and deployment)
+kubectl apply -f operator-deployment.yaml
+
+# Verify the operator pod is running
+kubectl get pods -n engineering-platform -l app=teams-operator
+
+# Expected output:
+# NAME                              READY   STATUS    RESTARTS   AGE
+# teams-operator-xxxxxxxxxx-xxxxx   1/1     Running   0          30s
+```
+
+#### Step 4: Verify Reconciliation
+
+```bash
+# Watch the operator logs to see it polling and reconciling
+kubectl logs -f deployment/teams-operator -n engineering-platform
+
+# You should see output like:
+# Teams Operator starting...
+# Teams API URL: http://teams-api-service.engineering-platform.svc.cluster.local:4200
+# Poll interval: 30 seconds
+
+# Now create a team via the API (in a separate terminal)
+curl -X POST "http://localhost:8080/teams" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Platform Team"}'
+
+# After the next poll cycle (up to 30 seconds), the operator log should show:
+# ✅ Created namespace 'team-platform-team' for team 'Platform Team'
+
+# Verify the namespace was created
+kubectl get namespace team-platform-team --show-labels
+```
+
+#### Step 5: Test Deletion Reconciliation
+
+```bash
+# Delete the team via the API
+curl -X DELETE "http://localhost:8080/teams/<team-id>"
+
+# After the next poll cycle, the operator should remove the namespace
+# Check operator logs for:
+# 🗑️ Deleted namespace 'team-platform-team' for removed team
+
+# Verify the namespace is gone
+kubectl get namespaces | grep team-
+```
+
+#### Operator Troubleshooting
+
+**Operator pod is in CrashLoopBackOff:**
+```bash
+# Check the logs for the error
+kubectl logs deployment/teams-operator -n engineering-platform --previous
+
+# Common causes:
+# - Teams API not reachable (check TEAMS_API_URL env var and verify the API service is running)
+# - RBAC permissions missing (check that the ClusterRole and ClusterRoleBinding were applied)
+# - Image not loaded into kind (re-run: kind load docker-image teams-operator:local --name 5min-idp)
+```
+
+**Operator running but not creating namespaces:**
+```bash
+# Check the API URL the operator is using
+kubectl get deployment teams-operator -n engineering-platform -o jsonpath='{.spec.template.spec.containers[0].env}' | python3 -m json.tool
+
+# Verify the Teams API is reachable from inside the cluster
+kubectl run test-curl --rm -it --image=curlimages/curl -- curl http://teams-api-service.engineering-platform.svc.cluster.local:4200/teams
+
+# Check if RBAC is correct
+kubectl auth can-i create namespaces --as=system:serviceaccount:engineering-platform:teams-operator
+```
+
+**Path**: [`./teams-operator/`](./teams-operator/)
+
 ## 🚀 Quick Start Guide
 
 ### Recommended Learning Path
@@ -155,6 +275,12 @@ cd teams-app
 # Follow the teams-app/README.md guide
 ```
 
+**Step 4: Deploy the Kubernetes Operator**
+```bash
+cd teams-operator
+# Follow the operator installation steps in this README (Section 4 above)
+```
+
 ### Alternative: Deploy Everything at Once
 
 For experienced users who want to see the complete stack:
@@ -177,10 +303,12 @@ kubectl get pods --all-namespaces | grep teams
 
 Once all components are deployed, test the complete workflow:
 
+> **Important**: The Teams API uses **in-memory storage**. All team data is lost when the API pod restarts. This is intentional for the workshop. If you are working on the capstone and need data to persist across restarts, consider deploying a PostgreSQL or SQLite backend as an extension exercise.
+
 ### 1. API Testing
 ```bash
-# Port forward the API
-kubectl port-forward -n teams-api svc/teams-api-service 8080:80
+# Port forward the API (service port 4200 maps to container port 8000)
+kubectl port-forward -n teams-api svc/teams-api-service 8080:4200
 
 # Test API endpoints
 curl http://localhost:8080/health

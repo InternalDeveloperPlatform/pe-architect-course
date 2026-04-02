@@ -176,17 +176,30 @@ kubectl scale deployment <deployment-name> --replicas=1
 **Port Conflicts**
 - Grafana: Default port 3000
 - Teams UI: Default port 4200
-- Teams API: Default port 8080
+- Teams API: Service port 4200 (maps to container port 8000)
+
+**Network Access Patterns**
+
+This workshop uses three different URL patterns depending on how you access services. Refer to the table below when configuring URLs or debugging connectivity:
+
+| Access Method | URL Pattern | When to Use | Example |
+|---|---|---|---|
+| Coder Desktop VPN | `http://<workspace-name>.coder:<port>` | When Coder Desktop is active (macOS/Windows) | `http://supersandbox.coder:3000` |
+| Ingress (sslip.io) | `http://<service>.127.0.0.1.sslip.io` | When accessing services through Kubernetes ingress | `http://teams-api.127.0.0.1.sslip.io` |
+| Port-forward (localhost) | `http://localhost:<local-port>` | Fallback for any environment, including Linux without Coder Desktop | `http://localhost:3000` |
+
+If you are on **Linux** (where Coder Desktop is not available), use `coder port-forward <workspace> --tcp <local-port>:<service-port>` and access services via `localhost`. See the [Foundation README](foundation/README.md) for detailed platform-specific instructions.
 
 ### Getting Help
 
-1. **Check module-specific README files** for detailed troubleshooting
-2. **Review pod logs** for specific error messages:
+1. **Check the [Troubleshooting Guide](TROUBLESHOOTING.md)** for common issues and known fixes
+2. **Check module-specific README files** for detailed troubleshooting
+3. **Review pod logs** for specific error messages:
    ```bash
    kubectl logs <pod-name> -n <namespace>
    ```
-3. **Verify prerequisite installations** before proceeding
-4. **Reach out to facilitators** for assistance
+4. **Verify prerequisite installations** before proceeding
+5. **Reach out to facilitators** for assistance
 
 ## 📖 Additional Resources
 

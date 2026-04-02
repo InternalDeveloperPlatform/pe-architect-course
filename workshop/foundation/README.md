@@ -11,6 +11,19 @@ This guide will walk you through setting up a complete Kubernetes development en
 
 ---
 
+## Setting Up Shell Completions
+
+If you find that `kubectl` tab completion is not working (you may see `bash: _get_comp_words_by_ref: command not found`), run the following:
+
+```bash
+echo "source /etc/bash_completion" >> ~/.bashrc
+source ~/.bashrc
+```
+
+> **Note on Coder workspace restarts**: Changes to `~/.bashrc` may not persist if your Coder workspace container is rebuilt. If you lose completions after a restart, re-run the command above. If you are administering the Coder template, consider adding this to the `devcontainer.json` `postCreateCommand` for automatic persistence.
+
+---
+
 ## Installing Grafana Stack
 
 ### Step 1: Add Helm Repository
@@ -137,6 +150,24 @@ Or, just construct the url as follows:
 `http://<workspace-name>.coder:3000`
 
 So if your workspace name is student123 your url is http://student123.coder:3000/
+
+**on Linux (Coder Desktop is not available)**
+
+Coder Desktop does not support Linux. Use the Coder CLI to forward ports directly to localhost instead:
+
+```bash
+# Forward Grafana to localhost:3000
+coder port-forward <workspace-name> --tcp 3000:3000
+
+# Access Grafana at http://localhost:3000
+```
+
+You can forward multiple ports simultaneously:
+```bash
+coder port-forward <workspace-name> --tcp 3000:3000 --tcp 4200:4200 --tcp 8080:8080
+```
+
+All exercises in this course are fully completable using `coder port-forward` and `localhost` URLs. When the instructions reference `http://<workspace-name>.coder:<port>`, substitute `http://localhost:<port>` instead.
 
 **on Mac OSX**
 1. Activate coder connect
