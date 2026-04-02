@@ -16,8 +16,8 @@ spec:
       - "kube-public"
       - "gatekeeper-system"
     exemptImages:
-      - "registry.k8s.io/"
-      - "gcr.io/distroless/"
+      - "registry.k8s.io/"    # Kubernetes system images (e.g., kube-proxy, coredns)
+      - "gcr.io/distroless/"  # Google distroless base images (minimal, no shell)
     exemptUsers:
-      - "1000"
-      - "65534"
+      - "1000"   # Common non-root user UID used in workshop deployments (e.g., deployment-works.yaml)
+      - "65534"  # 'nobody' user — standard unprivileged UID used by many minimal container images
