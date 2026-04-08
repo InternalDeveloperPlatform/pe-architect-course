@@ -1,0 +1,16 @@
+{
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+    }
+  },
+  "postCreateCommand": ".devcontainer/postCreateCommand.sh",
+  "postStartCommand": ".devcontainer/postStartCommand.sh",
+  "workspaceFolder": "/workspaces/pe-architect-course",
+  "hostRequirements": {
+    "cpus": 4
+  },
+  "forwardPorts": [
+    8443
+  ]
+}
