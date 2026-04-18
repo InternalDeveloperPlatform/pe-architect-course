@@ -75,7 +75,7 @@ kubectl get constrainttemplates
 # Example output:
 # NAME                    AGE
 # k8srequiredlabels      20m
-# k8scvescanning         10m
+# vulnerabilityscan      10m
 # codecoveragesimple     10s
 ```
 
