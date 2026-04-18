@@ -185,7 +185,7 @@ kubectl get constrainttemplates | grep -i vuln
 kubectl get constraints | grep -i vuln
 
 # Check constraint status for any issues
-kubectl describe constraint -f cve-constraint.yaml
+kubectl describe -f cve-constraint.yaml
 ```
 
 **2. Policy Enforcement Test**:
