@@ -149,6 +149,9 @@ kubectl get pods
 
 # You should see the secure-app pod in "Running" state
 kubectl get deployment secure-app
+
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+secure-app   1/1     1            1           62s
 ```
 
 ### Step 5: View Deployment Details
