@@ -117,10 +117,8 @@ kubectl apply -f deployment.yaml
 
 **Expected Result**:
 ```
-Error from server (admission webhook denied):
-Container image contains vulnerabilities exceeding policy thresholds:
-- Critical: 2 (max allowed: 0)
-- High: 5 (max allowed: 2)
+Error from server (Forbidden): error when creating "deployment.yaml": admission webhook "validation.gatekeeper.sh" denied the request: [enforce-vulnerability-scanning] Image httpd:2.4 has 2 critical CVEs, exceeding maximum allowed (0)
+[enforce-vulnerability-scanning] Image httpd:2.4 has 4 high severity CVEs, exceeding maximum allowed (3)
 ```
 
 **Understanding the failure**:
