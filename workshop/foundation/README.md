@@ -74,6 +74,18 @@ grafana:
   persistence:
     enabled: true
     size: 2Gi
+  # Fix for init-chown-data permission denied after workspace restart
+  # See: https://github.com/grafana/helm-charts/issues/752
+  initChownData:
+    enabled: true
+    securityContext:
+      capabilities:
+        add:
+          - CHOWN
+          - DAC_READ_SEARCH
+          - DAC_OVERRIDE
+        drop:
+          - ALL
 
 # AlertManager configuration
 alertmanager:
