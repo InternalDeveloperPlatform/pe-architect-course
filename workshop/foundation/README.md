@@ -129,7 +129,7 @@ To access port-forwarded resources, you need to first install coder desktop.
 Please follow the instructions here:
 https://coder.com/docs/user-guides/desktop
 
-(Basically, you need to do 2 things in the instructions above. Use ```brew install --cask coder/coder/coder-desktop``` and then ```ssh <workspace-name>.code```)
+(Basically, you need to do 2 things in the instructions above. Use ```brew install --cask coder/coder/coder-desktop``` and then ```ssh <workspace-name>.coder```, `ssh salmon-sailfish-81.coder`)
 Coder desktop provides easy access to your resources over a secure VPN tunnel.
 
 ```bash
@@ -138,7 +138,7 @@ Coder desktop provides easy access to your resources over a secure VPN tunnel.
 kubectl port-forward -n monitoring service/grafana-stack 3000:80
 
 # Navigate to
-`http://<workspace-name>.coder:3000/grafana`
+`http://salmon-sailfish-81:3000/grafana`
 ```
 
 #### Note - Workspace URL
@@ -449,18 +449,18 @@ kubectl delete -f simple-constraint.yaml
 ### ✅ Success Criteria
 
 Your foundation setup is complete when:
-- [ ] All monitoring pods are in "Running" state
-- [ ] All gatekeeper pods are in "Running" state
-- [ ] Grafana dashboard is accessible at `http://<workspace-name>.coder:3000`
-- [ ] Metrics Server pod is in "Running" state
-- [ ] `kubectl top nodes` returns resource metrics
-- [ ] You can login to Grafana with admin/admin123
-- [ ] Constraint template `k8srequiredlabels` exists
-- [ ] Constraint `ns-must-have-gk` is active
-- [ ] Creating namespace without required label fails
-- [ ] Creating namespace with required label succeeds
-- [ ] Resource usage is reasonable (< 80% memory)
-- [ ] Remove constraint `ns-must-have-gk` after you finish testing
+- [x] All monitoring pods are in "Running" state
+- [x] All gatekeeper pods are in "Running" state
+- [x] Grafana dashboard is accessible at `http://<workspace-name>.coder:3000`
+- [x] Metrics Server pod is in "Running" state
+- [x] `kubectl top nodes` returns resource metrics
+- [x] You can login to Grafana with admin/admin123
+- [x] Constraint template `k8srequiredlabels` exists
+- [x] Constraint `ns-must-have-gk` is active
+- [x] Creating namespace without required label fails
+- [x] Creating namespace with required label succeeds
+- [x] Resource usage is reasonable (< 80% memory)
+- [x] Remove constraint `ns-must-have-gk` after you finish testing
 
 ## 🚨 Troubleshooting
 
@@ -539,6 +539,33 @@ kubectl port-forward -n monitoring service/grafana-stack 3001:80
 # Check if password is correct
 kubectl get secret -n monitoring grafana-stack -o jsonpath="{.data.admin-password}" | base64 --decode && echo
 ```
+
+If `kubectl port-forward` shows a message like `failed to connect to localhost:3000 inside namespace` with both IPv4 and IPv6 `connection refused`, the problem is usually not networking. That error commonly means the port-forward reached the Grafana pod, but Grafana never started listening on port `3000`.
+
+One known cause in this workshop is a broken Grafana persistent volume where the init container fails with a permission error under `/var/lib/grafana`. In that case, verify the pod state and logs first:
+
+```bash
+# Check whether Grafana is healthy
+kubectl get pods -n monitoring
+kubectl get endpoints -n monitoring grafana-stack
+
+# Inspect the failing init container if Grafana is stuck in Init or CrashLoopBackOff
+kubectl logs -n monitoring <grafana-pod-name> -c init-chown-data
+```
+
+If you do not need to preserve Grafana data, the narrow recovery is to recreate only the Grafana release data volume and then reinstall:
+
+```bash
+helm uninstall grafana-stack -n monitoring
+kubectl delete pvc -n monitoring grafana-stack
+helm install grafana-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --values grafana-stack-values.yaml \
+  --wait \
+  --timeout=600s
+```
+
+This removes only the Grafana PVC. Leave the Prometheus PVC in place unless you explicitly want to discard Prometheus data too.
 
 #### 4. High Resource Usage / Cluster Overloaded
 **Symptoms**: High CPU/memory usage, pods failing to start
