@@ -212,12 +212,12 @@ kubectl delete -f deployment.yaml --ignore-not-found=true
 ### Success Criteria ✅
 
 Your CVE scanning is working correctly when:
-- [ ] CVE constraint template exists
-- [ ] CVE constraint is active and enforcing
-- [ ] Vulnerable image deployment is **blocked** with clear error message
-- [ ] Safe image deployment **succeeds** and runs
-- [ ] Error messages clearly explain policy violations
-- [ ] You understand how to adjust vulnerability thresholds
+- [x] CVE constraint template exists
+- [x] CVE constraint is active and enforcing
+- [x] Vulnerable image deployment is **blocked** with clear error message
+- [x] Safe image deployment **succeeds** and runs
+- [x] Error messages clearly explain policy violations
+- [x] You understand how to adjust vulnerability thresholds
 
 ## 🎨 Customization Options
 

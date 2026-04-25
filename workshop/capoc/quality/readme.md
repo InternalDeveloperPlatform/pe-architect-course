@@ -209,10 +209,10 @@ kubectl delete -f deployment.yaml --ignore-not-found=true
 ### Success Criteria ✅
 
 Your quality gates are working correctly when:
-- [ ] Code coverage constraint is enforcing the minimum threshold
-- [ ] Deployments with sufficient coverage **succeed** and run properly
-- [ ] Deployments with low coverage are **rejected** with clear error messages
-- [ ] You understand how to adjust coverage thresholds and coverage data
+- [x] Code coverage constraint is enforcing the minimum threshold
+- [x] Deployments with sufficient coverage **succeed** and run properly
+- [x] Deployments with low coverage are **rejected** with clear error messages
+- [x] You understand how to adjust coverage thresholds and coverage data
 
 ## 🚨 Troubleshooting
 

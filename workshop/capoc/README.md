@@ -89,10 +89,10 @@ This module contains two hands-on sub-modules:
 After completing both sub-modules, you should have:
 
 ### CVE Module ✅
-- [ ] CVE constraint template deployed
-- [ ] CVE constraint active and blocking vulnerable images
-- [ ] Successfully tested policy with vulnerable and safe images
-- [ ] Understanding of vulnerability thresholds and exceptions
+- [x] CVE constraint template deployed
+- [x] CVE constraint active and blocking vulnerable images
+- [x] Successfully tested policy with vulnerable and safe images
+- [x] Understanding of vulnerability thresholds and exceptions
 
 ### Quality Module ✅
 - [ ] Code coverage constraint template deployed
