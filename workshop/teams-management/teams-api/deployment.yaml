@@ -32,6 +32,12 @@ spec:
         env:
         - name: PORT
           value: "8000"
+        - name: HOST
+          value: "0.0.0.0"
+        - name: LOG_LEVEL
+          value: "info"
+        - name: CORS_ORIGINS
+          value: "*"
         securityContext:
           runAsNonRoot: true
           runAsUser: 1001
