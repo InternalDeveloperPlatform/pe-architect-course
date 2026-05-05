@@ -9,7 +9,8 @@ import sys
 import requests
 from typing import Optional
 
-API_BASE_URL = "http://teams-api.127.0.0.1.sslip.io"
+# API_BASE_URL = "http://teams-api.127.0.0.1.sslip.io"
+API_BASE_URL = "http://localhost:3002"
 
 class TeamsAPI:
     def __init__(self, base_url: str = API_BASE_URL):
