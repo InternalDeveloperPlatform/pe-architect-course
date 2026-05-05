@@ -284,13 +284,13 @@ kubectl get deployment secure-nonroot-app
 ### Success Criteria ✅
 
 Your security operations setup is working when:
-- [ ] Falco pods are running on all nodes
-- [ ] Falco generates alerts for suspicious activities
-- [ ] Custom security rules are loaded and active
-- [ ] Security constraint template exists
-- [ ] Security constraints block non-compliant deployments
-- [ ] Compliant deployments succeed and run
-- [ ] You can correlate runtime alerts with deployment policies
+- [x] Falco pods are running on all nodes
+- [x] Falco generates alerts for suspicious activities
+- [x] Custom security rules are loaded and active
+- [x] Security constraint template exists
+- [x] Security constraints block non-compliant deployments
+- [x] Compliant deployments succeed and run
+- [x] You can correlate runtime alerts with deployment policies
 
 ## 🎨 Customization Options
 

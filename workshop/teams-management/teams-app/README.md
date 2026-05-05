@@ -65,7 +65,7 @@ npm run dev
 npm start
 ```
 
-The application will be available at `http://localhost:4200`
+The application will be available at `http://salmon-sailfish-81.coder:4200/`
 
 ### 3. Deploy to Kubernetes
 

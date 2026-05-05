@@ -95,10 +95,10 @@ After completing both sub-modules, you should have:
 - [x] Understanding of vulnerability thresholds and exceptions
 
 ### Quality Module ✅
-- [ ] Code coverage constraint template deployed
-- [ ] Coverage constraint active and blocking low-coverage commits
-- [ ] Successfully tested with passing and failing coverage scenarios
-- [ ] Understanding of code coverage policy enforcement
+- [x] Code coverage constraint template deployed
+- [x] Coverage constraint active and blocking low-coverage commits
+- [x] Successfully tested with passing and failing coverage scenarios
+- [x] Understanding of code coverage policy enforcement
 
 ## 🔗 Navigation
 

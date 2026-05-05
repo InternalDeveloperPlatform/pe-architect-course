@@ -26,7 +26,7 @@ The Teams CLI tool allows you to:
 python3 --version
 
 # Check if Teams API is accessible (if running locally)
-curl -f http://localhost:8080/health || echo "Teams API not accessible"
+curl -f http://localhost:3002/health || echo "Teams API not accessible"
 ```
 
 ## ⚙️ Installation & Setup
@@ -36,18 +36,6 @@ curl -f http://localhost:8080/health || echo "Teams API not accessible"
 ```bash
 # In coder install the deps
 sudo apt install -y python3.12-venv python3-pip
-
-# Install required Python packages
-pip install -r requirements.txt
-
-# Or install with pip3 if needed
-pip3 install -r requirements.txt
-```
-
-**If you encounter permission issues**:
-```bash
-# Install in user directory
-pip install --user -r requirements.txt
 
 # Or use virtual environment (recommended)
 python3 -m venv venv
