@@ -1,1 +1,5 @@
 setup/terraform/**
+**/venv/**
+**/node_modules/**
+**/.angular/**
+**/dist/**
