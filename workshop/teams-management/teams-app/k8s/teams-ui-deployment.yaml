@@ -30,11 +30,12 @@ spec:
       containers:
       - name: teams-ui
         image: teams-ui:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         env:
         - name: API_URL
-          value: "http://teams-api-service:4200"
+          value: "http://localhost:8000"
         securityContext:
           runAsNonRoot: true
           runAsUser: 101

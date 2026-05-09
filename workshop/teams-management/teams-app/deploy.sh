@@ -90,12 +90,24 @@ build_images() {
     log_info "Building UI Docker image..."
     docker build -t $UI_IMAGE .
 
-    # Build API image (assuming API Dockerfile exists)
-    if [ -f "api.Dockerfile" ]; then
+    # Build API image from the sibling teams-api service
+    if [ -f "../teams-api/Dockerfile" ]; then
         log_info "Building API Docker image..."
-        docker build -f api.Dockerfile -t $API_IMAGE .
+        docker build -f ../teams-api/Dockerfile -t $API_IMAGE ../teams-api
     else
-        log_warning "API Dockerfile not found. Make sure API image is available"
+        log_warning "API Dockerfile not found at ../teams-api/Dockerfile. Make sure API image is available"
+    fi
+
+    # For kind, load local images into cluster nodes to avoid ImagePullBackOff on local tags
+    if command -v kind &> /dev/null; then
+        CURRENT_CONTEXT=$(kubectl config current-context 2>/dev/null || true)
+        if [[ "$CURRENT_CONTEXT" == kind-* ]]; then
+            CLUSTER_NAME=${CURRENT_CONTEXT#kind-}
+            log_info "Detected kind context '$CURRENT_CONTEXT'. Loading local images into kind cluster '$CLUSTER_NAME'..."
+            kind load docker-image "$UI_IMAGE" --name "$CLUSTER_NAME"
+            kind load docker-image "$API_IMAGE" --name "$CLUSTER_NAME"
+            log_success "Loaded local images into kind cluster"
+        fi
     fi
 
     log_success "Docker images built successfully"

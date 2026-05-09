@@ -39,7 +39,7 @@ metadata:
     kubernetes.io/ingress.class: traefik
 spec:
   rules:
-  - host: teams-ui.127.0.0.1.sslip.io
+  - host: localhost
     http:
       paths:
       - path: /

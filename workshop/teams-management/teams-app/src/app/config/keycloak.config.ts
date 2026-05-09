@@ -1,7 +1,7 @@
 import { KeycloakConfig } from 'keycloak-js';
 
 const keycloakConfig: KeycloakConfig = {
-  url: 'http://platform-auth.127.0.0.1.sslip.io',
+  url: 'http://localhost:8888',
   realm: 'teams',
   clientId: 'teams-ui',
 };
