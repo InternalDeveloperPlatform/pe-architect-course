@@ -87,8 +87,8 @@ metadata:
     traefik.ingress.kubernetes.io/headers.accesscontrolallowmethods: GET,POST,PUT,DELETE,OPTIONS
     traefik.ingress.kubernetes.io/headers.accesscontrolalloworigin: "*"
     traefik.ingress.kubernetes.io/headers.accesscontrolallowheaders: Content-Type,Authorization,X-Requested-With
-    kubernetes.io/ingress.class: traefik
 spec:
+  ingressClassName: traefik
   rules:
   - host: teams-api.127.0.0.1.sslip.io
     http:
