@@ -66,7 +66,7 @@ Sometimes, you might find that some of these are missing. Use apt-get, and / or 
 
 ## 📚 Workshop Modules
 
-### 1. 🏗️ Foundation (`01_foundation/`) - **START HERE**
+### 1. 🏗️ Foundation (`foundation/`) - **START HERE**
 
 Contains the fundamental setup for your Kubernetes environment including:
 - Kubernetes cluster verification

@@ -20,6 +20,6 @@ spec:
         runAsNonRoot: true
       containers:
       - name: web
-        image: nginx:1.21
+        image: nginx:1.27-alpine
         ports:
         - containerPort: 8080

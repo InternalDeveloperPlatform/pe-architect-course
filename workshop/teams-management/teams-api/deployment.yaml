@@ -83,12 +83,12 @@ metadata:
   name: teams-api-ingress
   namespace: teams-api
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
-    traefik.ingress.kubernetes.io/headers.accesscontrolallowmethods: GET,POST,PUT,DELETE,OPTIONS
-    traefik.ingress.kubernetes.io/headers.accesscontrolalloworigin: "*"
-    traefik.ingress.kubernetes.io/headers.accesscontrolallowheaders: Content-Type,Authorization,X-Requested-With
-    kubernetes.io/ingress.class: traefik
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization, X-Requested-With"
 spec:
+  ingressClassName: nginx
   rules:
   - host: teams-api.127.0.0.1.sslip.io
     http:

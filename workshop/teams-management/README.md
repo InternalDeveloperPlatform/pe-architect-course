@@ -66,6 +66,8 @@ This module implements a complete 3-tier application stack:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+> **Note — Ingress Controller**: The ingress manifests in this module use **ingress-nginx**, the same Nginx ingress controller installed by the Terraform setup in `setup/terraform/idp-ingress.tf`. If you are using `kubectl port-forward` to access services (which most students do), the ingress controller is not involved — port-forward bypasses ingress entirely. The ingress manifests with `*.127.0.0.1.sslip.io` host rules are provided for students who want to experiment with host-based routing.
+
 ## 📚 Module Components
 
 ### 1. 🚀 Teams API (`teams-api/`)

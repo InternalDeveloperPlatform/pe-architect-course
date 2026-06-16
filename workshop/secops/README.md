@@ -95,6 +95,8 @@ kubectl logs -n falco-system daemonset/falco | head -20
 - **Default Rules**: Pre-configured security detection rules
 - **DaemonSet**: Runs on every node for complete coverage
 
+> **Running locally (OrbStack, Docker Desktop, Colima)?** The `modern_ebpf` driver requires kernel-level access that some local container runtimes cannot provide. OrbStack in particular runs a lightweight Linux VM that does not expose the BPF subsystem to Kind containers. If Falco pods crash with driver errors on your local setup, try `--set driver.kind=module` or `--set driver.kind=kmod` first. If none of the driver modes work, consider using [KubeScape](https://kubescape.io/) as a complementary tool — it performs configuration and vulnerability scanning rather than real-time syscall monitoring, but covers many of the same compliance checks. Falco will work as expected when deployed to a full Kubernetes cluster (e.g., EKS, AKS, GKE, or the Coder environment).
+
 ### Step 2: Test Basic Falco Detection
 
 Let's verify Falco is working by triggering a basic security alert:

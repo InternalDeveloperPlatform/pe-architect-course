@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: web
-        image: nginx:1.21  # 0 critical, 1 high CVE
+        image: nginx:1.27-alpine  # 0 critical, 1 high CVE
         ports:
         - containerPort: 80
