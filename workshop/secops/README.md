@@ -419,7 +419,7 @@ kubectl describe constraint <constraint-name>
 kubectl rollout restart deployment -n gatekeeper-system gatekeeper-controller-manager
 
 # Re-apply constraint template
-kubectl apply -f security-constraint-template.yaml
+kubectl apply -f constraint-template.yaml
 ```
 
 #### 4. High Resource Usage

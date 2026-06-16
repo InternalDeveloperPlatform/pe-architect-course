@@ -289,7 +289,7 @@ For experienced users who want to see the complete stack:
 
 ```bash
 # Deploy all components in sequence
-kubectl apply -f teams-api/k8s/
+kubectl apply -f teams-api/deployment.yaml
 kubectl apply -f teams-app/k8s/
 
 # Set up CLI tool
@@ -420,7 +420,7 @@ lsof -i :8080
 **Solutions**:
 ```bash
 # Restart port forwarding
-kubectl port-forward -n teams-api svc/teams-api-service 8080:80
+kubectl port-forward -n teams-api svc/teams-api-service 8080:4200
 
 # Check API logs
 kubectl logs -f deployment/teams-api -n teams-api

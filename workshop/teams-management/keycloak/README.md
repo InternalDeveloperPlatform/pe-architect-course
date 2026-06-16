@@ -1,4 +1,4 @@
-# keykloak
+# Keycloak
 
 We deploy keycloak as our SSO provider
 

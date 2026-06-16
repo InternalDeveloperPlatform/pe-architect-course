@@ -322,7 +322,7 @@ kubectl logs -n teams-api deployment/teams-api
 **Solutions**:
 ```bash
 # Start port forwarding for Kubernetes deployment
-kubectl port-forward -n teams-api svc/teams-api-service 8080:80
+kubectl port-forward -n teams-api svc/teams-api-service 8080:4200
 
 # Use correct API URL for your setup
 python teams_cli.py --url http://correct-api-url health

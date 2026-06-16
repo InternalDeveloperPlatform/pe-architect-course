@@ -14,7 +14,7 @@ COPY . .
 RUN npm run build:prod
 
 # Use nginx to serve the app
-FROM nginx:alpine
+FROM nginx:1.27-alpine
 
 # Copy built app to nginx
 COPY --from=build /app/dist/teams-ui /usr/share/nginx/html

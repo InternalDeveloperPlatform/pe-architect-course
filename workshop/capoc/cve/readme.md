@@ -268,7 +268,7 @@ spec:
 **Issue: Constraint not enforcing**
 ```bash
 # Check constraint status
-kubectl describe constraint -f cve-constraint.yaml
+kubectl describe -f cve-constraint.yaml
 
 # Look for errors in the status section
 # Common causes: template syntax errors, invalid parameters
@@ -277,7 +277,7 @@ kubectl describe constraint -f cve-constraint.yaml
 **Issue: All deployments blocked**
 ```bash
 # Check if thresholds are too restrictive
-kubectl get constraint -f cve-constraint.yaml -o yaml
+kubectl get -f cve-constraint.yaml -o yaml
 
 # Consider adjusting maxHigh, maxMedium values
 ```
@@ -286,7 +286,7 @@ kubectl get constraint -f cve-constraint.yaml -o yaml
 ```bash
 # Verify vulnerable images are actually being blocked
 # Check constraint configuration for correct parameters
-kubectl apply -f deployment-vulnerable.yaml
+kubectl apply -f deployment.yaml
 # This should fail if policy is working
 ```
 
