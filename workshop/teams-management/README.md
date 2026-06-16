@@ -353,8 +353,8 @@ for project in "ProjectA" "ProjectB" "ProjectC"; do
     python teams_cli.py create "$project Team"
 done
 
-# Generate reports
-python teams_cli.py list --output json > team_report.json
+# List current teams
+python teams_cli.py list
 ```
 
 ### Scenario 3: Platform Self-Service

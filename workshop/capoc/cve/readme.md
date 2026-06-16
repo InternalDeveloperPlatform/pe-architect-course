@@ -228,10 +228,8 @@ Edit your constraint to change acceptable risk levels:
 ```yaml
 # Example threshold configuration
 parameters:
-  maxCritical: 0      # Block any critical vulnerabilities
-  maxHigh: 2          # Allow up to 2 high-severity issues
-  maxMedium: 10       # Allow up to 10 medium-severity issues
-  maxLow: 50          # Allow up to 50 low-severity issues
+  maxCriticalCVEs: 0    # Block any critical vulnerabilities
+  maxHighCVEs: 2        # Allow up to 2 high-severity issues
 ```
 
 ### Adding Image Exceptions
@@ -241,7 +239,7 @@ For approved images that may contain acceptable vulnerabilities:
 ```yaml
 # Example exception configuration
 parameters:
-  exemptImages:
+  allowedImages:
     - "registry.company.com/approved-legacy-app:v1.2.3"
     - "docker.io/company/special-tool:*"
 ```

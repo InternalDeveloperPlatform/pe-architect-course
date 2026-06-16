@@ -83,7 +83,7 @@ Linux users without Coder Desktop should use `coder port-forward` — see the [F
 
 Recommended reading (not required):
 - [Effective Platform Engineering](https://effectiveplatformengineering.com) — Chankramath, Oliver, Cheneweth, and Alvarez
-- [The Platform Engineer's Handbook](https://tpub.com/en-us/product/the-platform-engineers-handbook-9781806380121) — Chankramath
+- [The Platform Engineer's Handbook](https://www.packtpub.com/en-us/product/the-platform-engineers-handbook-9781806380121) — Chankramath
 
 ## Contributing
 

@@ -296,20 +296,16 @@ curl -X POST http://localhost:8080/teams -H "Content-Type: application/json" -d 
 
 ### Environment Variables
 
-The API supports configuration through environment variables:
+The deployment sets the following environment variable:
 
 ```yaml
-# Example deployment configuration
+# From deployment.yaml
 env:
   - name: PORT
     value: "8000"
-  - name: HOST
-    value: "0.0.0.0"
-  - name: LOG_LEVEL
-    value: "info"
-  - name: CORS_ORIGINS
-    value: "*"
 ```
+
+> **Note**: The current API code hardcodes `host="0.0.0.0"` and `port=8000`. CORS is configured in `main.py` to allow all origins. There are no environment variables for `HOST`, `LOG_LEVEL`, or `CORS_ORIGINS` at this time.
 
 ### Resource Limits
 
@@ -349,7 +345,7 @@ kubectl top nodes
 **Solutions**:
 ```bash
 # If image pull issues, verify image exists
-docker pull olivercodes01/teams-api:latest
+docker pull olivercodes01/teams-api:0.0.2
 
 # If resource issues, check cluster capacity
 kubectl describe nodes
@@ -375,10 +371,10 @@ lsof -i :3002
 **Solutions**:
 ```bash
 # Restart port forwarding
-kubectl port-forward -n teams-api svc/teams-api-service 8080:4200
+kubectl port-forward -n teams-api svc/teams-api-service 3002:4200
 
-# Try different local port if 8080 is busy
-kubectl port-forward -n teams-api svc/teams-api-service 8081:4200
+# Try different local port if 3002 is busy
+kubectl port-forward -n teams-api svc/teams-api-service 3003:4200
 
 # Check firewall or network restrictions
 ```
@@ -555,7 +551,7 @@ The current API uses in-memory storage, which means:
 
 Your Teams API setup is complete when:
 - [ ] API pods are running in the teams-api namespace
-- [ ] Port forwarding works and you can access <workspace-name>.coder:8080
+- [ ] Port forwarding works and you can access <workspace-name>.coder:3002
 - [ ] Health check returns 200 OK status
 - [ ] You can create, list, and delete teams via curl
 - [ ] Interactive API docs are accessible at /docs

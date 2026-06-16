@@ -98,10 +98,9 @@ kubectl get constraints
 
 # Look for your coverage constraint
 # Example output:
-# NAME                           AGE
-# ns-must-have-gk               25m
-# container-cve-scanning        15m
-# enforce-code-coverage-simple  10s
+# NAME                               AGE
+# enforce-vulnerability-scanning     15m
+# enforce-code-coverage-simple       10s
 ```
 
 **Understanding the constraint configuration**:

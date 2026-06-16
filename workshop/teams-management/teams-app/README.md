@@ -116,7 +116,7 @@ teams-app/
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8000'
+  apiUrl: 'http://teams-api.127.0.0.1.sslip.io'
 };
 ```
 
@@ -124,7 +124,7 @@ export const environment = {
 ```typescript
 export const environment = {
   production: true,
-  apiUrl: 'http://teams-api-service:8000'  // Kubernetes service
+  apiUrl: 'http://teams-api-service:4200'  // Kubernetes service
 };
 ```
 
@@ -185,17 +185,14 @@ The Dockerfile uses a multi-stage build:
 
 After deployment:
 
-1. **Add to hosts file**:
-   ```bash
-   echo "127.0.0.1 engineering-platform.local" >> /etc/hosts
-   ```
+1. **Via ingress** (if ingress-nginx is running):
+   The active ingress serves the UI at `http://teams-ui.127.0.0.1.sslip.io` (sslip.io resolves to 127.0.0.1 automatically — no hosts file needed).
 
-2. **Port forward** (for local clusters):
+2. **Via port-forward** (recommended for most students):
    ```bash
-   kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+   kubectl port-forward -n engineering-platform service/teams-ui-service 8080:80
    ```
-
-3. **Open browser**: `http://engineering-platform.local:8080`
+   Then open `http://<workspace-name>.coder:8080`
 
 ## 🔍 Monitoring and Health Checks
 
