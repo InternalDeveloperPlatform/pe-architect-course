@@ -81,7 +81,9 @@ Linux users without Coder Desktop should use `coder port-forward` — see the [F
 - A decent internet connection
 - Optionally, VS Code with the [Coder remote extension](https://coder.com/docs/ides/vscode)
 
-Recommended reading: [Effective Platform Engineering](https://effectiveplatformengineering.com) (not required)
+Recommended reading (not required):
+- [Effective Platform Engineering](https://effectiveplatformengineering.com) — Chankramath, Oliver, Cheneweth, and Alvarez
+- [The Platform Engineer's Handbook](https://tpub.com/en-us/product/the-platform-engineers-handbook-9781806380121) — Chankramath
 
 ## Contributing
 
