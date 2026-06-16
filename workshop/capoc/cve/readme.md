@@ -96,9 +96,8 @@ kubectl get constraints
 
 # Look for your CVE constraint
 # Example output:
-# NAME                           AGE
-# ns-must-have-gk               15m
-# container-cve-scanning        2m
+# NAME
+# vulnerabilityscan.constraints.gatekeeper.sh/enforce-vulnerability-scanning
 ```
 
 **Understanding the constraint configuration**:
