@@ -197,7 +197,7 @@ All exercises in this course are fully completable using `coder port-forward` an
 ![coder-workspace-name](img/coder-workspace-name.png)
 
 6. Setup the grafana port forward mentioned above.
-6. Then with the VPN tunnel active you'd be able to access `http://<workspace-name>.coder:3000` (in the example case `http://supersandbox.coder:3000/grafana`)
+6. Then with the VPN tunnel active you'd be able to access `http://<workspace-name>.coder:3000` (in the example case `http://supersandbox.coder:3000`)
 
 **Getting Admin Credentials**
 ```bash

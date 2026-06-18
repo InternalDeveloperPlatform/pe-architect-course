@@ -132,7 +132,7 @@ Note: the delete command executes immediately with no confirmation prompt.
 python teams_cli.py --url http://localhost:8080 list
 
 # Point to a Coder workspace
-python teams_cli.py --url http://<workspace-name>.coder:3002 health
+python teams_cli.py --url http://<workspace-name>.coder:8080 health
 ```
 
 ## Command Reference

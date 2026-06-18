@@ -277,7 +277,7 @@ kubectl describe -f cve-constraint.yaml
 # Check if thresholds are too restrictive
 kubectl get -f cve-constraint.yaml -o yaml
 
-# Consider adjusting maxHigh, maxMedium values
+# Consider adjusting maxHighCVEs value
 ```
 
 **Issue: Policy too permissive**

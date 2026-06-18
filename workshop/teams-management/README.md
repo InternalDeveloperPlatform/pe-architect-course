@@ -462,7 +462,7 @@ kubectl describe pod <pod-name> -n <namespace>
 kubectl top nodes
 
 # Verify images are accessible
-docker pull olivercodes01/teams-api:latest
+docker pull olivercodes01/teams-api:0.0.2
 ```
 
 ### Component-Specific Troubleshooting
