@@ -147,7 +147,7 @@ Coder desktop provides easy access to your resources over a secure VPN tunnel.
 ```bash
 # In Coder environments, use the built-in proxy
 # Forward the port and access via the Coder proxy URL
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+kubectl port-forward -n monitoring service/grafana-stack 3000:80
 
 # Navigate to
 `http://<workspace-name>.coder:3000`
@@ -206,7 +206,7 @@ All exercises in this course are fully completable using `coder port-forward` an
 # Password: admin123
 
 # Get the admin password (if you didn't set a custom one)
-kubectl get secret -n monitoring grafana-stack-grafana \
+kubectl get secret -n monitoring grafana-stack \
   -o jsonpath="{.data.admin-password}" | base64 --decode && echo
 ```
 
@@ -407,7 +407,7 @@ kubectl get constraints
 **Test Grafana Dashboard**
 ```bash
 # Forward the port (run in a separate terminal)
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+kubectl port-forward -n monitoring service/grafana-stack 3000:80
 
 # In your browser, go to http://<workspace-name>.coder:3000
 # Login with admin/admin123
@@ -534,22 +534,22 @@ kubectl apply -f simple-constraint.yaml
 kubectl get pods -n monitoring | grep grafana
 
 # Check service exists
-kubectl get service -n monitoring grafana-stack-grafana
+kubectl get service -n monitoring grafana-stack
 
 # Check logs for errors
-kubectl logs -n monitoring deployment/grafana-stack-grafana
+kubectl logs -n monitoring deployment/grafana-stack
 ```
 
 **Solutions**:
 ```bash
 # Restart port-forward
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+kubectl port-forward -n monitoring service/grafana-stack 3000:80
 
 # Or try different port if 3000 is busy
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3001:80
+kubectl port-forward -n monitoring service/grafana-stack 3001:80
 
 # Check if password is correct
-kubectl get secret -n monitoring grafana-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode && echo
+kubectl get secret -n monitoring grafana-stack -o jsonpath="{.data.admin-password}" | base64 --decode && echo
 ```
 
 #### 4. High Resource Usage / Cluster Overloaded
@@ -709,7 +709,7 @@ Now that your foundation is solid, you can proceed to any of the specialized mod
 **Accessing Your Services:**
 ```bash
 # Grafana Dashboard
-kubectl port-forward -n monitoring service/grafana-stack-grafana 3000:80
+kubectl port-forward -n monitoring service/grafana-stack 3000:80
 # Then visit: http://<workspace-name>.coder:3000 (admin/admin123)
 
 # Check all services
