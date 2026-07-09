@@ -92,7 +92,7 @@ This module implements a complete 3-tier application stack:
 
 ### 2. 🛠️ Teams CLI (`cli/`)
 **Duration**: ~15-25 minutes
-**Technology**: Python, Click framework
+**Technology**: Python, argparse
 
 **What You'll Build**:
 - Command-line interface for team management
@@ -547,7 +547,7 @@ For detailed troubleshooting of individual components, refer to:
 ### Technologies Used
 - **FastAPI**: Modern Python web framework
 - **Angular**: Frontend framework for web applications
-- **Click**: Python CLI framework
+- **argparse**: Python CLI framework
 - **Docker**: Containerization
 - **Kubernetes**: Container orchestration
 

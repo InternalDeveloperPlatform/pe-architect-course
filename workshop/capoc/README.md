@@ -132,7 +132,7 @@ kubectl get constrainttemplates
 kubectl get constraints
 
 # Check for errors
-kubectl describe constraint <constraint-name>
+kubectl describe -f <constraint-file>.yaml
 ```
 
 Ready to implement compliance at the point of change? **Start with the [CVE Module](./cve/readme.md)** to secure your container deployments! 🚀

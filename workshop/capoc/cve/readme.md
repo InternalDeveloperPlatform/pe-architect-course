@@ -96,8 +96,8 @@ kubectl get constraints
 
 # Look for your CVE constraint
 # Example output:
-# NAME
-# vulnerabilityscan.constraints.gatekeeper.sh/enforce-vulnerability-scanning
+# NAME                             ENFORCEMENT-ACTION   TOTAL-VIOLATIONS
+# enforce-vulnerability-scanning   deny                 ...
 ```
 
 **Understanding the constraint configuration**:

@@ -282,7 +282,7 @@ kubectl get pods -n engineering-platform
 kubectl logs deployment/teams-api -n engineering-platform
 
 # Test API connectivity
-kubectl exec -it deployment/teams-ui -n engineering-platform -- wget -qO- http://teams-api-service:8000/health
+kubectl exec -it deployment/teams-ui -n engineering-platform -- wget -qO- http://teams-api-service:4200/health
 ```
 
 **2. UI Not Loading**
@@ -370,7 +370,7 @@ For issues and questions:
    ```
 3. **Verify API connectivity** is working:
    ```bash
-   kubectl exec -it deployment/teams-ui -n engineering-platform -- curl http://teams-api-service:8000/health
+   kubectl exec -it deployment/teams-ui -n engineering-platform -- curl http://teams-api-service:4200/health
    ```
 4. **Check ingress and service configurations** for networking issues:
    ```bash

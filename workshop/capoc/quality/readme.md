@@ -80,7 +80,7 @@ kubectl get constrainttemplates
 ```
 
 **What this template does**:
-- Requires code coverage on all containers
+- Validates that deployments carry a `commit-sha` annotation whose code coverage meets the minimum threshold
 
 ### Step 2: Apply Quality Constraints
 
@@ -183,7 +183,7 @@ kubectl get constrainttemplates | grep codecoverage
 kubectl get constraints | grep coverage
 
 # Check constraint status for any issues
-kubectl describe constraint enforce-code-coverage-simple
+kubectl describe codecoveragesimple enforce-code-coverage-simple
 ```
 
 **2. Policy Enforcement Testing**:
@@ -220,7 +220,7 @@ Your quality gates are working correctly when:
 **Issue: All deployments blocked by coverage policy**
 ```bash
 # Check if the minimum coverage is too strict
-kubectl get constraint enforce-code-coverage-simple -o yaml
+kubectl get codecoveragesimple enforce-code-coverage-simple -o yaml
 
 # Look at the parameters section
 # Consider lowering minimumCoverage or adding coverage data for your commit SHA
@@ -236,7 +236,7 @@ kubectl get constraint enforce-code-coverage-simple -o yaml
 **Issue: Constraint not enforcing**
 ```bash
 # Check constraint status
-kubectl describe constraint <constraint-name>
+kubectl describe codecoveragesimple <constraint-name>
 
 # Look for errors in status section
 # Common causes: template errors, parameter mismatches

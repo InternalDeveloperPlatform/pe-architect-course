@@ -107,7 +107,7 @@ kubectl run test-privileged \
   --image=busybox \
   --restart=Never \
   --rm -it \
-  --overrides='{"spec":{"securityContext":{"privileged":true}}}' \
+  --overrides='{"spec":{"containers":[{"name":"test-privileged","image":"busybox","securityContext":{"privileged":true}}]}}' \
   -- sh
 ```
 
@@ -185,7 +185,7 @@ kubectl apply -f constraint.yaml
 kubectl get constraints | grep -i falco
 
 # Check constraint status
-kubectl describe constraint
+kubectl describe falcorootprevention enforce-falco-root-prevention
 ```
 
 ### Step 6: Test Security Detection and Prevention
@@ -298,7 +298,7 @@ Your security operations setup is working when:
 
 ### Custom Falco Rules
 
-Add organization-specific detection rules in `custom_rules.yaml`:
+Add organization-specific detection rules (see `root-detect-rule.yaml` for an example):
 
 ```yaml
 # Example custom rule
@@ -410,7 +410,7 @@ kubectl get pods -n gatekeeper-system
 kubectl get constrainttemplates
 
 # Check constraint configuration
-kubectl describe constraint <constraint-name>
+kubectl describe falcorootprevention <constraint-name>
 ```
 
 **Solutions**:

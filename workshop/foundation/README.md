@@ -494,7 +494,9 @@ kubectl top nodes
 **Solutions**:
 ```bash
 # If resource constraints, scale down other components
-kubectl scale deployment -n monitoring grafana-stack-prometheus-node-exporter --replicas=1
+# Note: node-exporter is a DaemonSet (not a Deployment), so delete it if needed:
+kubectl delete daemonset -n monitoring grafana-stack-prometheus-node-exporter
+kubectl scale deployment -n monitoring grafana-stack-kube-state-metrics --replicas=0
 
 # Or increase cluster resources (add nodes, increase limits)
 ```
@@ -512,7 +514,7 @@ kubectl get constrainttemplates
 kubectl get constraints
 
 # Check constraint status
-kubectl describe constraint ns-must-have-gk
+kubectl describe k8srequiredlabels ns-must-have-gk
 ```
 
 **Solutions**:
@@ -568,7 +570,8 @@ kubectl get events --sort-by='.lastTimestamp'
 **Solutions**:
 ```bash
 # Scale down resource-intensive components
-kubectl scale deployment -n monitoring grafana-stack-prometheus-node-exporter --replicas=0
+# Note: node-exporter is a DaemonSet, delete it rather than scaling:
+kubectl delete daemonset -n monitoring grafana-stack-prometheus-node-exporter
 kubectl scale deployment -n monitoring grafana-stack-kube-state-metrics --replicas=0
 
 # Reduce Prometheus retention period
@@ -649,8 +652,9 @@ helm install grafana-stack prometheus-community/kube-prometheus-stack \
 If you experience performance issues:
 
 ```bash
-# Scale down replicas for resource-intensive components
-kubectl scale deployment -n monitoring grafana-stack-prometheus-node-exporter --replicas=0
+# Scale down resource-intensive components
+# Note: node-exporter is a DaemonSet, delete it rather than scaling:
+kubectl delete daemonset -n monitoring grafana-stack-prometheus-node-exporter
 kubectl scale deployment -n monitoring grafana-stack-kube-state-metrics --replicas=0
 ```
 
