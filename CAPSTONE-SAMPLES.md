@@ -10,3 +10,4 @@ For access to more samples, reach out to Ajay at ajay@platformetrics.com.
 - [Brian Beck — Platform Engineering Architect Demo](https://www.youtube.com/watch?v=SwC5Ce1aXNA)
 - [Patrick Bes — Capstone Results Video](https://www.youtube.com/watch?v=JyiUzuFHbz8)
 - [Marnix van Valen — Capstone Demo](https://www.youtube.com/watch?v=8L_ol8ic3jw)
+- [Emanuele Pecorari — Capstone Demo](https://youtu.be/jJwbGWO7Lz0)
