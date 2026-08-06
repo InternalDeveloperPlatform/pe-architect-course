@@ -128,6 +128,8 @@ export const environment = {
 };
 ```
 
+> ⚠️ **Keycloak URL lives in two places.** Besides `environment.ts` above, `src/app/config/keycloak.config.ts` has its **own separate, hardcoded** `url` for Keycloak. If you change one and not the other, login will silently keep failing. See [Troubleshooting](#-troubleshooting) for the full list of places to keep in sync.
+
 ### API Integration
 
 The application integrates with your Teams API through the following endpoints:
@@ -193,6 +195,30 @@ After deployment:
    kubectl port-forward -n engineering-platform service/teams-ui-service 8080:80
    ```
    Then open `http://<workspace-name>.coder:8080`
+
+### 🪟 Windows 11 + Coder (without Coder Connect / Coder Desktop)
+
+If you're on Windows 11 Pro and can't get **Coder Connect / Coder Desktop** to reliably resolve the workspace hostname (`http://<workspace-name>.coder`), use the **two-hop port-forward pattern** below instead. It's confirmed working end-to-end (API + UI + Keycloak login).
+
+**Pattern (per service):**
+
+1. Inside the **Coder workspace**, forward the Kubernetes service to a local port with `kubectl port-forward`.
+2. On **Windows PowerShell**, forward that same port from the workspace to your machine with `coder port-forward`.
+3. Open `http://localhost:<port>` in your Windows browser.
+
+Run all of these **in parallel** (one terminal/PowerShell window each):
+
+| Service | In the workspace | In Windows PowerShell | Browser URL |
+|---|---|---|---|
+| Teams API | `kubectl port-forward -n teams-api svc/teams-api-service 8080:4200` | `coder port-forward <workspace> --tcp 8080:8080` | `http://localhost:8080` |
+| Teams UI (deployed to k8s) | `kubectl port-forward -n engineering-platform service/teams-ui-service 8081:80` | `coder port-forward <workspace> --tcp 8081:8081` | `http://localhost:8081` |
+| Teams UI (dev, `ng serve` / `npm start`) | *(runs natively in the workspace, not a k8s service)* | `coder port-forward <workspace> --tcp 4200:4200` | `http://localhost:4200` |
+| Keycloak | `kubectl port-forward -n keycloak svc/keycloak-service 8082:8080` | `coder port-forward <workspace> --tcp 8082:8082` | `http://localhost:8082` |
+| Grafana (optional) | `kubectl port-forward -n monitoring service/grafana-stack 3000:80` | `coder port-forward <workspace> --tcp 3000:3000` | `http://localhost:3000` |
+
+> Both the deployed UI (8081) and the dev-server UI (4200) work — pick whichever fits your workflow. Just make sure the port you use is present in Keycloak's `webOrigins`/`redirectUris` for the `teams-ui` client (see Troubleshooting below).
+
+With this pattern you don't need `sslip.io` DNS, ingress, or Coder Connect at all — everything resolves through `localhost` on Windows.
 
 ## 🔍 Monitoring and Health Checks
 
@@ -304,6 +330,39 @@ rm -rf node_modules dist
 npm install
 npm run build
 ```
+
+### Keycloak login fails / blank screen / "Timeout waiting for 3rd party check iframe message"
+
+This usually means Keycloak's expected URL and the URL you're actually accessing the app from **don't match**. There are **4 different places** that all need to agree on the access method (`localhost:<port>` for the two-hop Windows pattern, or `<workspace>.coder` / `*.sslip.io` for other setups) — and they're easy to get out of sync:
+
+1. **`k8s/keycloak-deployment.yaml`** — `KC_HOSTNAME` env var. If you're accessing Keycloak through more than one method (ingress, `*.coder`, `localhost` via port-forward), the simplest fix is to **remove `KC_HOSTNAME` entirely** and keep `KC_HOSTNAME_STRICT=false`. Keycloak then derives its URL dynamically from the incoming `Host` header instead of a fixed value, so it works regardless of how you're accessing it.
+2. **Keycloak realm's `webOrigins` / `redirectUris`** (client `teams-ui`, in `keycloak-realm-config` ConfigMap or applied live). Needs every origin/URL you'll actually use — e.g. `http://localhost:4200`, `http://localhost:8081`. If you already imported the realm once, editing the ConfigMap and restarting the pod **won't apply the change** (Keycloak's import strategy is "ignore if already exists"). Update the live client instead with `kcadm.sh`:
+   ```bash
+   kubectl exec -n keycloak deployment/keycloak -- /opt/keycloak/bin/kcadm.sh config credentials \
+     --server http://localhost:8080 --realm master --user admin --password admin
+
+   kubectl exec -n keycloak deployment/keycloak -- /opt/keycloak/bin/kcadm.sh get clients -r teams -q clientId=teams-ui --fields id
+   # copy the returned id, then:
+   kubectl exec -n keycloak deployment/keycloak -- /opt/keycloak/bin/kcadm.sh update clients/<CLIENT-UUID> -r teams \
+     -s 'webOrigins=["http://localhost:8081","http://localhost:4200"]' \
+     -s 'redirectUris=["http://localhost:8081/*","http://localhost:4200/*"]'
+   ```
+3. **`src/environments/environment.ts`** — `apiUrl` and `keycloak.url` need to point at the ports you're actually using (e.g. `http://localhost:8080` for the API, `http://localhost:8082` for Keycloak).
+4. **`src/app/config/keycloak.config.ts`** — ⚠️ **this is the one that's easy to miss.** It has its own hardcoded Keycloak `url`, separate from `environment.ts`. Changing `environment.ts` alone will **not** fix your login if this file still points at the old URL (e.g. `http://platform-auth.127.0.0.1.sslip.io`). Update it to match, e.g.:
+   ```typescript
+   const keycloakConfig: KeycloakConfig = {
+     url: 'http://localhost:8082',
+     realm: 'teams',
+     clientId: 'teams-ui',
+   };
+   ```
+
+**Bonus tip:** if `npm start` / `ng serve` seems to hang with no output in the Coder workspace, add `"cli": { "analytics": false }` to `angular.json`. Without it, Angular CLI can wait on an interactive analytics prompt that never resolves in a non-interactive terminal.
+
+### Known bugs in the workshop material (as of Aug 2026)
+
+- **`keycloak.yaml` — missing `---` separator.** The file defines the Keycloak `Deployment` twice: once with basic CORS settings, and again further down labeled `# k8s/keycloak-deployment.yaml (Enhanced with comprehensive CORS)`. There's no `---` document separator between the end of the `keycloak-realm-config` ConfigMap and the start of the "Enhanced" Deployment, so `kubectl apply -f keycloak.yaml` fails to parse (duplicate keys in a single YAML document). Add a `---` before the `# k8s/keycloak-deployment.yaml (Enhanced with comprehensive CORS)` comment.
+- **Unfilled placeholder in `webOrigins`.** The realm's `teams-ui` client ships with a literal, never-filled-in placeholder: `"http://fernando-pe-arch.coder:<port>"` in `webOrigins` (and a similar pattern in `post.logout.redirect.uris`). This needs to be replaced with a real origin (or removed) before the realm import is usable as-is.
 
 ### Development Tips
 
