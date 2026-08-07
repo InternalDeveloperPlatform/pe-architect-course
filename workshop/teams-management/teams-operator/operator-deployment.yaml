@@ -71,7 +71,7 @@ spec:
         image: olivercodes01/teams-operator:0.0.1
         env:
         - name: TEAMS_API_URL
-          value: "http://teams-api-service.engineering-platform.svc.cluster.local:4200"
+          value: "http://teams-api-service.teams-api.svc.cluster.local:4200"
         - name: POLL_INTERVAL
           value: "30"
         securityContext:
