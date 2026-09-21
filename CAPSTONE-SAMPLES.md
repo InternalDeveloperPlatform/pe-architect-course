@@ -11,3 +11,5 @@ For access to more samples, reach out to Ajay at ajay@platformetrics.com.
 - [Patrick Bes — Capstone Results Video](https://www.youtube.com/watch?v=JyiUzuFHbz8)
 - [Marnix van Valen — Capstone Demo](https://www.youtube.com/watch?v=8L_ol8ic3jw)
 - [Emanuele Pecorari — Capstone Demo](https://youtu.be/jJwbGWO7Lz0)
+- [HT Walid — Capstone Demo](https://www.youtube.com/watch?v=IxAt-sLhSco)
+- [Kevin Hopkins — Capstone Demo](https://www.youtube.com/watch?v=tzOyrMwhjLY)
