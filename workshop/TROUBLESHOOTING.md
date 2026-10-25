@@ -85,6 +85,31 @@ Access all services via `http://localhost:<port>`. When instructions reference `
 
 ---
 
+### Dev container fails to start (exit code 127)
+
+**Symptom**: The Coder workspace comes up, but the dev container does not start. The workspace startup log shows the dev container step failing with exit code `127`.
+
+**Cause**: Exit code 127 means "command not found". The dev container CLI (`devcontainer`) and the Node.js/npm it runs on are not installed on the workspace VM, so the container is never built.
+
+**Diagnosis** (in a terminal on the workspace VM):
+```bash
+for c in devcontainer node npm; do command -v "$c" >/dev/null || echo "$c: not found"; done
+```
+
+**Workaround**: Run the modules directly on the workspace VM. The `5min-idp` kind cluster is already running there.
+```bash
+# The cluster should be reachable from the VM
+kubectl get nodes   # 5min-idp-control-plane should be Ready
+
+cd /workspaces/pe-architect-course/workshop
+```
+
+Helm is not installed on the VM, so complete the [Prerequisite](README.md#prerequisite) step in `workshop/README.md` before starting the Foundation module.
+
+**Note**: Installing the dev container CLI and Node.js on the VM has not been verified as a fix. If you confirm one, please update this entry.
+
+---
+
 ## Grafana & Monitoring (Foundation Module)
 
 ### Cannot access Grafana dashboard
@@ -110,6 +135,46 @@ kubectl port-forward -n monitoring service/grafana-stack 3001:80
 ```
 
 Default credentials: `admin` / `admin123`
+
+---
+
+### Grafana pod OOMKilled with the default 512Mi limit
+
+**Symptom**: The Grafana pod in the `monitoring` namespace keeps restarting after `helm install`, and its last termination reason is `OOMKilled`.
+
+**Diagnosis**:
+```bash
+kubectl get pods -n monitoring | grep grafana
+kubectl describe pod -n monitoring <grafana-pod-name>
+# Look for: Last State: Terminated, Reason: OOMKilled
+```
+
+**Cause**: The values file from Foundation Step 2 limits the Grafana container to `512Mi`, which is not enough for the Grafana version the chart installs.
+
+**Fix**: In `grafana-stack-values.yaml`, raise the Grafana memory limit to `1Gi`:
+```yaml
+grafana:
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi   # was 512Mi
+      cpu: 500m
+```
+
+Then apply it:
+```bash
+helm upgrade --install grafana-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --version 92.11.0 \
+  --values grafana-stack-values.yaml \
+  --wait
+
+kubectl get pods -n monitoring | grep grafana   # Running, all containers ready
+```
+
+**Note**: Tested with chart version `92.11.0`. Step 3 installs without `--version`, so newer chart versions may behave differently; `helm list -n monitoring` shows the version you have.
 
 ---
 
