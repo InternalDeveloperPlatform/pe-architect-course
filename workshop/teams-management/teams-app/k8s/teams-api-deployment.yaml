@@ -8,7 +8,7 @@ metadata:
     app: teams-api
     component: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: teams-api
@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
       - name: teams-api
-        image: olivercodes01/teams-api:0.0.2
+        image: teams-api:local
+        imagePullPolicy: Never
         ports:
         - containerPort: 8000
         env:

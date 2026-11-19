@@ -22,12 +22,13 @@ spec:
     spec:
       containers:
       - name: teams-ui
-        image: olivercodes01/teams-app:0.0.7
+        image: teams-ui:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 80
         env:
         - name: API_URL
-          value: "http://teams-api-service:4200"
+          value: "http://teams-api-adv-service:4200"
         resources:
           requests:
             memory: "64Mi"

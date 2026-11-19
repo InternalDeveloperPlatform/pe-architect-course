@@ -1,5 +1,24 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: teams-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: teams-api-preview-service
+  namespace: teams-api
+spec:
+  selector:
+    app: teams-api
+  ports:
+    - protocol: TCP
+      port: 4200
+      targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: teams-api
   namespace: teams-api
@@ -8,10 +27,15 @@ metadata:
   annotations:
     commit-sha: 8b514a1cb354
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: teams-api
+  strategy:
+    blueGreen:
+      activeService: teams-api-service
+      previewService: teams-api-preview-service
+      autoPromotionEnabled: false
   template:
     metadata:
       labels:
@@ -26,7 +50,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: teams-api
-        image: olivercodes01/teams-api:0.0.2
+        image: kitzingmarko/teams-api:v1.0.3
         ports:
         - containerPort: 8000
         env:

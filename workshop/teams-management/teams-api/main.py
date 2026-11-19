@@ -8,7 +8,7 @@ from datetime import datetime
 app = FastAPI(
     title="Teams API",
     description="A simple API for team leads to create and manage teams",
-    version="1.0.0"
+    version="1.0.3"
 )
 
 # Configure CORS

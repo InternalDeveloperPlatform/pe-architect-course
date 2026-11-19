@@ -1,68 +1,69 @@
-# # k8s/keycloak-namespace.yaml apiVersion: v1
-# apiVersion: v1
-# kind: Namespace
-# metadata:
-#   name: keycloak
-# ---
-# # k8s/keycloak-postgres.yaml
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: keycloak-postgres
-#   namespace: keycloak
-#   labels:
-#     app: keycloak-postgres
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app: keycloak-postgres
-#   template:
-#     metadata:
-#       labels:
-#         app: keycloak-postgres
-#     spec:
-#       containers:
-#       - name: postgres
-#         image: postgres:15-alpine
-#         env:
-#         - name: POSTGRES_DB
-#           value: keycloak
-#         - name: POSTGRES_USER
-#           value: keycloak
-#         - name: POSTGRES_PASSWORD
-#           value: keycloak
-#         - name: PGDATA
-#           value: /var/lib/postgresql/data/pgdata
-#         ports:
-#         - containerPort: 5432
-#         volumeMounts:
-#         - name: postgres-storage
-#           mountPath: /var/lib/postgresql/data
-#         resources:
-#           requests:
-#             memory: "256Mi"
-#             cpu: "250m"
-#           limits:
-#             memory: "512Mi"
-#             cpu: "500m"
-#       volumes:
-#       - name: postgres-storage
-#         emptyDir: {}
-#
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: keycloak-postgres-service
-#   namespace: keycloak
-# spec:
-#   selector:
-#     app: keycloak-postgres
-#   ports:
-#   - port: 5432
-#     targetPort: 5432
-#
+# k8s/keycloak-namespace.yaml apiVersion: v1
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: keycloak
+
+---
+# k8s/keycloak-postgres.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak-postgres
+  namespace: keycloak
+  labels:
+    app: keycloak-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak-postgres
+  template:
+    metadata:
+      labels:
+        app: keycloak-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: keycloak
+        - name: POSTGRES_USER
+          value: keycloak
+        - name: POSTGRES_PASSWORD
+          value: keycloak
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: postgres-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-postgres-service
+  namespace: keycloak
+spec:
+  selector:
+    app: keycloak-postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+
 # ---
 # # k8s/keycloak-deployment.yaml
 # apiVersion: apps/v1
@@ -147,20 +148,20 @@
 #         configMap:
 #           name: keycloak-realm-config
 #
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: keycloak-service
-#   namespace: keycloak
-# spec:
-#   selector:
-#     app: keycloak
-#   ports:
-#   - port: 8080
-#     targetPort: 8080
-#     name: http
-#
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-service
+  namespace: keycloak
+spec:
+  selector:
+    app: keycloak
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+
 # ---
 # # k8s/keycloak-ingress.yaml
 # apiVersion: networking.k8s.io/v1
@@ -182,98 +183,108 @@
 #             port:
 #               number: 8080
 #
-# ---
+---
 # # k8s/keycloak-realm-config.yaml
-# apiVersion: v1
-# kind: ConfigMap
-# metadata:
-#   name: keycloak-realm-config
-#   namespace: keycloak
-# data:
-#   teams-realm.json: |
-#     {
-#       "realm": "teams",
-#       "enabled": true,
-#       "sslRequired": "none",
-#       "registrationAllowed": false,
-#       "resetPasswordAllowed": true,
-#       "editUsernameAllowed": false,
-#       "bruteForceProtected": true,
-#       "clients": [
-#         {
-#           "clientId": "teams-ui",
-#           "name": "Teams UI",
-#           "description": "Angular Teams Management UI",
-#           "enabled": true,
-#           "clientAuthenticatorType": "client-secret",
-#           "redirectUris": [
-#             "http://platform-auth.127.0.0.1.sslip.io/*",
-#             "http://engineering-platform.local/*",
-#             "http://localhost:4200/*",
-#             "http://<workspace-name>.coder/*"
-#           ],
-#           "webOrigins": [
-#             "http://platform-auth.127.0.0.1.sslip.io",
-#             "http://engineering-platform.local",
-#             "http://localhost:4200",
-#             "http://<workspace-name>.coder:<port>"
-#           ],
-#           "publicClient": true,
-#           "protocol": "openid-connect",
-#           "attributes": {
-#             "post.logout.redirect.uris": "http://platform-auth.127.0.0.1.sslip.io/*##http://localhost:4200/*##http://<workspace-name>.coder:*"
-#           }
-#         }
-#       ],
-#       "users": [
-#         {
-#           "username": "teamlead1",
-#           "enabled": true,
-#           "firstName": "Team",
-#           "lastName": "Lead",
-#           "email": "teamlead1@company.com",
-#           "emailVerified": true,
-#           "credentials": [
-#             {
-#               "type": "password",
-#               "value": "password123",
-#               "temporary": false
-#             }
-#           ],
-#           "realmRoles": ["team-leader"]
-#         },
-#         {
-#           "username": "admin",
-#           "enabled": true,
-#           "firstName": "Admin",
-#           "lastName": "User",
-#           "email": "admin@company.com",
-#           "emailVerified": true,
-#           "credentials": [
-#             {
-#               "type": "password",
-#               "value": "admin123",
-#               "temporary": false
-#             }
-#           ],
-#           "realmRoles": ["admin", "team-leader"]
-#         }
-#       ],
-#       "roles": {
-#         "realm": [
-#           {
-#             "name": "team-leader",
-#             "description": "Can create and manage teams"
-#           },
-#           {
-#             "name": "admin",
-#             "description": "Full administrative access"
-#           }
-#         ]
-#       }
-#     }
-#
-#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-config
+  namespace: keycloak
+data:
+  teams-realm.json: |
+    {
+      "realm": "teams",
+      "enabled": true,
+      "sslRequired": "none",
+      "registrationAllowed": false,
+      "resetPasswordAllowed": true,
+      "editUsernameAllowed": false,
+      "bruteForceProtected": true,
+      "clients": [
+        {
+          "clientId": "teams-ui",
+          "name": "Teams UI",
+          "description": "Angular Teams Management UI",
+          "enabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "redirectUris": [
+            "http://platform-auth.127.0.0.1.sslip.io/*",
+            "http://engineering-platform.local/*",
+            "http://localhost:4200/*",
+            "http://pe-course-architect-ws-1.coder:8081/*",
+            "http://localhost:8080/*",
+            "http://localhost:8081/*",
+            "http://localhost:8082/*"
+          ],
+          "webOrigins": [
+            "http://platform-auth.127.0.0.1.sslip.io",
+            "http://engineering-platform.local",
+            "http://localhost:4200",
+            "http://localhost:8080",
+            "http://localhost:8081",
+            "http://localhost:8082",
+            "http://pe-course-architect-ws-1.coder:4200",
+            "http://pe-course-architect-ws-1.coder:8080",
+            "http://pe-course-architect-ws-1.coder:3000",
+            "http://pe-course-architect-ws-1.coder:8081",
+            "http://pe-course-architect-ws-1.coder:8082"
+          ],
+          "publicClient": true,
+          "protocol": "openid-connect",
+          "attributes": {
+            "post.logout.redirect.uris": "http://platform-auth.127.0.0.1.sslip.io/*##http://localhost:4200/*##http://pe-course-architect-ws-1.coder:*##http://localhost:8081/*##http://localhost:8082/*"
+          }
+        }
+      ],
+      "users": [
+        {
+          "username": "teamlead1",
+          "enabled": true,
+          "firstName": "Team",
+          "lastName": "Lead",
+          "email": "teamlead1@company.com",
+          "emailVerified": true,
+          "credentials": [
+            {
+              "type": "password",
+              "value": "password123",
+              "temporary": false
+            }
+          ],
+          "realmRoles": ["team-leader"]
+        },
+        {
+          "username": "admin",
+          "enabled": true,
+          "firstName": "Admin",
+          "lastName": "User",
+          "email": "admin@company.com",
+          "emailVerified": true,
+          "credentials": [
+            {
+              "type": "password",
+              "value": "admin123",
+              "temporary": false
+            }
+          ],
+          "realmRoles": ["admin", "team-leader"]
+        }
+      ],
+      "roles": {
+        "realm": [
+          {
+            "name": "team-leader",
+            "description": "Can create and manage teams"
+          },
+          {
+            "name": "admin",
+            "description": "Full administrative access"
+          }
+        ]
+      }
+    }
+
+---
 # k8s/keycloak-deployment.yaml (Enhanced with comprehensive CORS)
 apiVersion: apps/v1
 kind: Deployment
@@ -315,8 +326,8 @@ spec:
           value: keycloak
         - name: KC_DB_PASSWORD
           value: keycloak
-        - name: KC_HOSTNAME
-          value: platform-auth.127.0.0.1.sslip.io
+#        - name: KC_HOSTNAME
+#          value: platform-auth.127.0.0.1.sslip.io
         - name: KC_HOSTNAME_STRICT
           value: "false"
         - name: KC_HTTP_ENABLED

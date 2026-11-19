@@ -1,0 +1,31 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: requireargorollout
+spec:
+  crd:
+    spec:
+      names:
+        kind: RequireArgoRollout
+      validation:
+        openAPIV3Schema:
+          type: object
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package requireargorollout
+
+        violation[{"msg": msg}] {
+          workload := input.review.object
+          workload.kind == "Deployment"
+          workload.metadata.name == "teams-api"
+          msg := "Use an Argo Rollout instead of a Deployment for teams-api in the teams-api namespace."
+        }
+
+        violation[{"msg": msg}] {
+          workload := input.review.object
+          workload.kind == "Deployment"
+          labels := object.get(workload.metadata, "labels", {})
+          labels.app == "teams-api"
+          msg := "Use an Argo Rollout instead of a Deployment for teams-api in the teams-api namespace."
+        }

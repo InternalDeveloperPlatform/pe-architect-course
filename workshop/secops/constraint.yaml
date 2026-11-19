@@ -9,12 +9,14 @@ spec:
         kinds: ["Pod"]
       - apiGroups: ["apps"]
         kinds: ["Deployment"]
-    namespaces: ["default", "production", "staging", "engineering-platform"]
+    namespaces: ["default", "production", "staging"]
   parameters:
     exemptNamespaces:
       - "kube-system"
       - "kube-public"
       - "gatekeeper-system"
+      - "engineering-platform"
+      - "argo-rollouts"
     exemptImages:
       - "registry.k8s.io/"    # Kubernetes system images (e.g., kube-proxy, coredns)
       - "gcr.io/distroless/"  # Google distroless base images (minimal, no shell)
